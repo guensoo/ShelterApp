@@ -34,7 +34,7 @@ public class ShelterService {
     public List<ShelterDTO> getFilteredShelter(ShelterDTO area){
         // 일단 전체 조회를 한다.
         List<ShelterEntity> shelters = repository.findAll();
-        // 가격 필터링(minPrice가 있을 경우)
+        // 구역 필터링(원하는 구역(area)가 있을 경우)
         if(area != null && area.getArea() != null) {
             shelters = shelters
                     .stream()
