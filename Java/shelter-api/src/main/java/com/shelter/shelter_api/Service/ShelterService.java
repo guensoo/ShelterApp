@@ -1,5 +1,8 @@
 package com.shelter.shelter_api.Service;
 
+import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.http.ResponseEntity;
 import com.shelter.shelter_api.DTO.ShelterDTO;
 import com.shelter.shelter_api.Entity.ShelterEntity;
 import com.shelter.shelter_api.Repository.ShelterRepository;
@@ -35,10 +38,31 @@ public class ShelterService {
         if(area != null && area.getArea() != null) {
             shelters = shelters
                     .stream()
-                    .filter(shelter -> shelter.getArea().equals(area.getArea()))
+                    .filter(shelter -> shelter.getArea() != null && shelter.getArea().contains(area.getArea()))
                     .collect(Collectors.toList());
         }
 
         return shelters.stream().map(ShelterDTO::new).collect(Collectors.toList());
+    }
+
+    public void fetchSheltersFromGov() {
+        String apiKey = "T7QQZrCmgbCm2X9dLNzQljBdOAdh9EmUUzFTsd2N4FMVjB7LvhX06T9JLO2WW1jFYsIJlp2D%2FNaXweMt13Axyw%3D%3D";
+        String url = "https://apis.data.go.kr/1741000/HealthSheltersForEachRegion";
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
+                .queryParam("serviceKey", apiKey)
+                .queryParam("pageNo", 1)
+                .queryParam("numOfRows", 100)
+                .queryParam("type", "xml");
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> response = restTemplate.getForEntity(builder.toUriString(), String.class);
+
+        if (response.getStatusCode().is2xxSuccessful()) {
+            System.out.println("✅ XML 응답 확인:\n" + response.getBody());
+            // 여기서 JacksonXmlMapper로 파싱 예정
+        } else {
+            System.out.println("❌ 요청 실패: " + response.getStatusCode());
+        }
     }
 }
