@@ -19,7 +19,7 @@ public class ShelterController {
     // 사용자 페이지
     // GET
     @GetMapping
-    public ResponseEntity<?> getAllLocForUser(@RequestParam(required=false) String area) {
+    public ResponseEntity<?> getAllLocForUser(@RequestParam(name = "area", required=false) String area) {
         ShelterDTO dto = new ShelterDTO();
         dto.setArea(area);
         List<ShelterDTO> shelters = shelterService.getFilteredShelter(dto);

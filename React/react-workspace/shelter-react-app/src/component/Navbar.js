@@ -25,9 +25,12 @@ const Navbar = () => {
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         
         {/* 좌측: 로고 이미지 클릭 시 메인으로 */}
-        <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }} onClick={() => navigate('/')}>
-          <img src="/logo.png" alt="쉼:터" style={{ height: 32, marginRight: 8 }} />
-          <Typography variant="h6" fontWeight="bold">쉼:터</Typography>
+        <Box
+          sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          onClick={() => navigate('/')}
+        >
+          <img src="/shelter_logo.png" alt="쉼:터" style={{ height: 48, marginRight: 12 }} />
+          <Typography variant="h6" fontWeight="bold"></Typography>
         </Box>
 
         {/* 중앙: 검색창 */}
