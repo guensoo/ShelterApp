@@ -1,0 +1,41 @@
+package com.shelter.shelter_api.Service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+public class ColdShelterService {
+
+    private final ColdShelterRepository repository;
+
+    public void saveAll(List<ColdShelterDto> dtoList) {
+        List<ColdShelter> shelters = dtoList.stream().map(dto ->
+            ColdShelter.builder()
+                .id(dto.getREARE_FCLT_NO())
+                .name(dto.getREARE_NM())
+                .address(dto.getDADDR())
+                .roadAddress(dto.getRONA_DADDR())
+                .capacity(dto.getUTZTN_PSBLTY_TNOP())
+                .modifiedAt(dto.getMDFCN_HR())
+                .remark(dto.getRMRK())
+                .weekdayStart(dto.getWKDY_OPER_BGNG_HR())
+                .weekdayEnd(dto.getWKDY_OPER_END_HR())
+                .saturdayStart(dto.getSTDY_OPER_BGNG_HR())
+                .saturdayEnd(dto.getSTDY_OPER_END_HR())
+                .sundayStart(dto.getSNDY_OPER_BGNG_HR())
+                .sundayEnd(dto.getSNDY_OPER_END_HR())
+                .holidayStart(dto.getLHLDY_OPER_BGNG_HR())
+                .holidayEnd(dto.getLHLDY_OPER_END_HR())
+                .facilityType(dto.getFCLT_TYPE())
+                .facilitySubType(dto.getFCLTY_SCLAS())
+                .lat(dto.getLAT())
+                .lng(dto.getLOT())
+                .build()
+        ).collect(Collectors.toList());
+
+        repository.saveAll(shelters);
+    }
+}

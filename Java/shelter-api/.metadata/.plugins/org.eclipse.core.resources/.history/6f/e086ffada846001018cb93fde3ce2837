@@ -1,0 +1,28 @@
+package com.shelter.shelter_api.Controller;
+
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.shelter.shelter_api.DTO.ColdShelterDTO;
+import com.shelter.shelter_api.Service.ColdShelterService;
+
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/cold-shelter")
+public class ColdShelterController {
+
+    private final ColdShelterService service;
+
+    @PostMapping("/save")
+    public ResponseEntity<String> saveShelters(@RequestBody List<ColdShelterDTO> dtoList) {
+        service.saveAll(dtoList);
+        return ResponseEntity.ok("한파쉼터 저장 완료");
+    }
+}

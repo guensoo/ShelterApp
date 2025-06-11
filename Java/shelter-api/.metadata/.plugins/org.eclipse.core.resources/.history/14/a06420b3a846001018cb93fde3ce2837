@@ -1,0 +1,82 @@
+package com.example.shelter.service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shelter.shelter_api.DTO.ColdShelterDTO;
+import com.shelter.shelter_api.Entity.ColdShelterEntity;
+import com.shelter.shelter_api.Repository.ColdShelterRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class ColdShelterService {
+
+    private final ColdShelterRepository coldShelterRepository;
+    private final ObjectMapper objectMapper;
+
+    private static final String API_URL = "https://www.safetydata.go.kr/V2/api/DSSP-IF-10804?serviceKey=7TH2H36WY8VW30FM";
+
+    public int fetchAndSaveColdShelters() {
+        try {
+            // 1. 외부 API 호출
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.getForEntity(API_URL, String.class);
+
+            // 2. JSON 파싱
+            JsonNode rootNode = objectMapper.readTree(response.getBody());
+            JsonNode bodyNode = rootNode.path("body");  // JSON 구조상 "body" 안에 배열 존재
+
+            List<ColdShelterDTO> dtoList = objectMapper.readValue(
+                    bodyNode.toString(),
+                    new TypeReference<List<ColdShelterDTO>>() {}
+            );
+
+            // 3. DTO → Entity 변환
+            List<ColdShelterEntity> entities = dtoList.stream()
+                    .map(dto -> ColdShelterEntity.builder()
+                            .reareNm(dto.getReareNm())
+                            .reareFcltNo(dto.getReareFcltNo())
+                            .fcltType(dto.getFcltType())
+                            .fcltySclas(dto.getFcltySclas())
+                            .daddr(dto.getDaddr())
+                            .ronaDaddr(dto.getRonaDaddr())
+                            .lat(dto.getLat())
+                            .lot(dto.getLot())
+                            .wkdyOperBgngHr(dto.getWkdyOperBgngHr())
+                            .wkdyOperEndHr(dto.getWkdyOperEndHr())
+                            .lhhldyOperBgngHr(dto.getLhhldyOperBgngHr())
+                            .lhhldyOperEndHr(dto.getLhhldyOperEndHr())
+                            .sndyOperBgngHr(dto.getSndyOperBgngHr())
+                            .sndyOperEndHr(dto.getSndyOperEndHr())
+                            .stdyOperBgngHr(dto.getStdyOperBgngHr())
+                            .stdyOperEndHr(dto.getStdyOperEndHr())
+                            .utztnPsbltyTnop(dto.getUtztnPsbltyTnop())
+                            .rmrk(dto.getRmrk())
+                            .mdfcnHr(dto.getMdfcnHr())
+                            .build()
+                    )
+                    .collect(Collectors.toList());
+
+            // 4. DB 저장
+            coldShelterRepository.saveAll(entities);
+
+            log.info("✅ 한파쉼터 {}건 저장 완료", entities.size());
+            return entities.size();
+
+        } catch (Exception e) {
+            log.error("❌ 한파쉼터 저장 실패", e);
+            return 0;
+        }
+    }
+}

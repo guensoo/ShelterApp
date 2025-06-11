@@ -1,0 +1,27 @@
+package com.shelter.shelter_api.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import com.shelter.shelter_api.DTO.ColdShelterDTO;
+import com.shelter.shelter_api.Entity.ColdShelterEntity;
+import com.shelter.shelter_api.Repository.ColdShelterRepository;
+
+import lombok.RequiredArgsConstructor;
+
+@Service
+@RequiredArgsConstructor
+public class ColdShelterService {
+
+    private final ColdShelterRepository repository;
+
+    public void saveAll(List<ColdShelterDTO> dtoList) {
+        List<ColdShelterEntity> entities = dtoList.stream()
+            .map(ColdShelterDTO::toEntity)
+            .collect(Collectors.toList());
+
+        repository.saveAll(entities);
+    }
+}

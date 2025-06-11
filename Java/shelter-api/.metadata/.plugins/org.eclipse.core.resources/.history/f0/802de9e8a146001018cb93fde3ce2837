@@ -1,0 +1,5 @@
+package com.shelter.shelter_api.Controller;
+
+public class ColdShelterController {
+
+}

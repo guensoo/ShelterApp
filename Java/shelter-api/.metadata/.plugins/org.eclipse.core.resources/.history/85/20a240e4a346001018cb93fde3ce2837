@@ -1,0 +1,43 @@
+package com.shelter.shelter_api.Entity;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "cold_shelter")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ColdShelter {
+
+    @Id
+    private Long id; // REARE_FCLT_NO 그대로 사용
+
+    private String name;
+    private String address;
+    private String roadAddress;
+    private int capacity;
+    private String modifiedAt;
+    private String remark;
+
+    private String weekdayStart;
+    private String weekdayEnd;
+    private String saturdayStart;
+    private String saturdayEnd;
+    private String sundayStart;
+    private String sundayEnd;
+    private String holidayStart;
+    private String holidayEnd;
+
+    private String facilityType;
+    private String facilitySubType;
+
+    private double lat;
+    private double lng;
+}

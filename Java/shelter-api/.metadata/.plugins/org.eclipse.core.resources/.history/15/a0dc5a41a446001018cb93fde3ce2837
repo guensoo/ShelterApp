@@ -1,0 +1,39 @@
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Table(name = "cold_shelter")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class ColdShelterEntity {
+    @Id
+    private Long REARE_FCLT_NO;
+
+    private String FCLT_TYPE;
+    private String REARE_NM;
+    private String DADDR;
+    private String RONA_DADDR;
+    private int UTZTN_PSBLTY_TNOP;
+    private String MDFCN_HR;
+    private String RMRK;
+    private String WKDY_OPER_BGNG_HR;
+    private String WKDY_OPER_END_HR;
+    private String SNDY_OPER_BGNG_HR;
+    private String SNDY_OPER_END_HR;
+    private String STDY_OPER_BGNG_HR;
+    private String STDY_OPER_END_HR;
+    private String LHLDY_OPER_BGNG_HR;
+    private String LHLDY_OPER_END_HR;
+    private String FCLTY_SCLAS;
+    private double LOT;
+    private double LAT;
+}

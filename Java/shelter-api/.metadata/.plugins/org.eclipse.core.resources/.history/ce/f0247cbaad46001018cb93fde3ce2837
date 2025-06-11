@@ -1,0 +1,33 @@
+package com.shelter.shelter_api.Controller;
+
+import com.shelter.shelter_api.DTO.ColdShelterDTO;
+import com.shelter.shelter_api.Service.ColdShelterService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/api/cold-shelter")
+public class ColdShelterController {
+
+    private final ColdShelterService service;
+
+    // 외부 API → 자동 저장
+    @PostMapping("/fetch")
+    public ResponseEntity<String> fetchFromApi() {
+        int count = service.fetchAndSaveFromApi();
+        return ResponseEntity.ok(count + "건 저장 완료");
+    }
+
+    // 클라이언트가 직접 DTO 전달
+    @PostMapping("/save")
+    public ResponseEntity<?> saveColdShelterList(@RequestBody List<ColdShelterDTO> coldShelterList) {
+        log.info("📥 받은 coldShelterList: {}", coldShelterList);
+
+        int savedCount = coldShelterService.saveAll(coldShelterList);
+        return ResponseEntity.ok("저장 성공: " + savedCount + "건");
+    }
+}
