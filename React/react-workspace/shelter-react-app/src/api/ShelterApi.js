@@ -1,4 +1,3 @@
-// src/api/ShelterApi.js 파일 수정
 import axios from 'axios';
 
 const hostname = window?.location?.hostname;
