@@ -56,7 +56,7 @@ const MapContainer = ({ shelters = [] }) => {
     <div
       ref={mapRef}
       id="map"
-      style={{ width: "100%", height: "85vh", minHeight: 400 }}
+      style={{ width: "100%", height: "90vh", minHeight: 400 }}
     />
   );
 };

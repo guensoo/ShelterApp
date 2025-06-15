@@ -12,20 +12,10 @@ const DUMMY_SHELTERS = [
 ];
 
 const MainPage = () => {
-  const [selectedTypes, setSelectedTypes] = useState([]);
-  const [searchKeyword, setSearchKeyword] = useState("");
-
-  // 실제 filter 예시 (모든 타입 표시)
   const filteredShelters = (DUMMY_SHELTERS || []).filter(() => true);
 
   return (
     <>
-      <Header
-        selectedTypes={selectedTypes}
-        setSelectedTypes={setSelectedTypes}
-        searchKeyword={searchKeyword}
-        setSearchKeyword={setSearchKeyword}
-      />
       <MapContainer shelters={filteredShelters} />
     </>
   );

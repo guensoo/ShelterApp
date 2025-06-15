@@ -44,7 +44,7 @@ const SignupPage = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fa", display: "flex", justifyContent: "center", alignItems: "center" }}>
+    <Box sx={{ minHeight: "84vh", bgcolor: "#f3f6fa", display: "flex", justifyContent: "center", alignItems: "center" }}>
       <Card sx={{ minWidth: 320, maxWidth: 400, width: "100%", borderRadius: 4, boxShadow: 6 }}>
         <CardContent>
           <Typography variant="h5" mb={2} color="primary" fontWeight="bold" textAlign="center" marginTop="10px">

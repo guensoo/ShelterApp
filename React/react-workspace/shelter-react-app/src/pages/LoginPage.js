@@ -22,22 +22,21 @@ const LoginPage = () => {
       setErrorMsg("아이디와 비밀번호를 모두 입력하세요.");
       return;
     }
-    if (
-      userId !== DUMMY_USER.userId ||
-      pw !== DUMMY_USER.password
-    ) {
+
+    if (userId !== DUMMY_USER.userId || pw !== DUMMY_USER.password) {
       setErrorMsg("아이디 또는 비밀번호가 다릅니다.");
       return;
     }
+
     // 로그인 성공
     localStorage.setItem("loginUser", JSON.stringify(DUMMY_USER));
     setErrorMsg("");
     alert("로그인 성공!");
-    navigate("/mypage");
+    navigate("/");
   };
 
   return (
-    <Box sx={{ minHeight: "100vh", bgcolor: "#f3f6fa", display: "flex", justifyContent: "center", alignItems: "center" }}>
+    <Box sx={{ minHeight: "84vh", bgcolor: "#f3f6fa", display: "flex", justifyContent: "center", alignItems: "center" }}>
       <Card sx={{ minWidth: 320, maxWidth: 400, width: "100%", borderRadius: 4, boxShadow: 6 }}>
         <CardContent>
           <Typography variant="h5" mb={2} color="primary" fontWeight="bold" textAlign="center" marginTop="10px">
@@ -61,7 +60,7 @@ const LoginPage = () => {
               margin="normal"
               fullWidth
               error={!!errorMsg}
-              helperText={errorMsg && "아이디 또는 비밀번호가 다릅니다."}
+              helperText={errorMsg || ""}
             />
             <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, fontWeight: 600, borderRadius: 2 }}>
               로그인
