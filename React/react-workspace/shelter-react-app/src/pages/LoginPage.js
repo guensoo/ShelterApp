@@ -4,12 +4,12 @@ import { Box, Card, CardContent, TextField, Button, Typography } from "@mui/mate
 
 const DUMMY_USER = {
   userId: "asdf1234",
-  userNickName: "신조오사사게요",
+  userNickName: "나예요",
   password: "asdf1234!",
   point: 1000
 };
 
-const LoginPage = () => {
+const LoginPage = ({setIsLoggedIn }) => {
   const [userId, setUserId] = useState("");
   const [pw, setPw] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -30,6 +30,7 @@ const LoginPage = () => {
 
     // 로그인 성공
     localStorage.setItem("loginUser", JSON.stringify(DUMMY_USER));
+    setIsLoggedIn(true);
     setErrorMsg("");
     alert("로그인 성공!");
     navigate("/");

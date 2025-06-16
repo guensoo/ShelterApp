@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 
-const MapContainer = ({ shelters = [] }) => {
+const MapContainer = ({ shelters = [], onSelectShelter }) => {
   const mapRef = useRef(null);
-  const mapInstance = useRef(null); // 지도 인스턴스 저장용
+  const mapInstance = useRef(null);
 
   useEffect(() => {
     if (!window.naver || !window.naver.maps || !mapRef.current) return;
@@ -25,12 +25,17 @@ const MapContainer = ({ shelters = [] }) => {
         });
 
         window.naver.maps.Event.addListener(marker, "click", () => {
-          alert(`${shelter.name} 클릭!`);
+          // 🟡 부모에게 선택된 쉼터 전달
+          onSelectShelter?.(shelter);
+
+          // 🟡 해당 위치로 pan
+          mapInstance.current.panTo(
+            new window.naver.maps.LatLng(shelter.lat, shelter.lng)
+          );
         });
       });
     };
 
-    // 위치 허용 요청
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -39,15 +44,13 @@ const MapContainer = ({ shelters = [] }) => {
             initializeMap(latitude, longitude);
           }
         },
-        (error) => {
-          console.warn("❌ 위치 권한 거부, 기본 위치로 설정됨.");
-          if (!mapInstance.current) {
-            initializeMap(37.5665, 126.9780); // 서울시청
-          }
+        () => {
+          console.warn("❌ 위치 권한 없음, 기본 위치");
+          initializeMap(37.5665, 126.9780);
         }
       );
     } else {
-      console.warn("❌ geolocation 지원 안 됨, 기본 위치로 설정됨.");
+      console.warn("❌ geolocation 미지원, 기본 위치");
       initializeMap(37.5665, 126.9780);
     }
   }, [shelters]);

@@ -8,23 +8,27 @@ import SignupPage from "./pages/SignupPage";
 import ReportPage from "./pages/Report/ReportPage";
 import BoardMain from "./pages/Board/BoardMain";
 import BoardDetail from "./pages/Board/BoardDetail";
-// import Footer from './components/layout/Footer';
+import Footer from './components/layout/Footer';
 import Header from './components/layout/Header';
 import BoardWrite from "./pages/Board/BoardWrite";
 import BoardEdit from './pages/Board/BoardEdit';
+import './App.css';
 
 function App() {
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [searchKeyword, setSearchKeyword] = useState("");
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        minWidth: "940px",
+        minHeight: "90vh",
         display: "flex",
         flexDirection: "column",
-        overflowX: "hidden",
-        overflowY: "hidden",
+        overflow: "hidden",
+        padding: 0,
+        margin: 0,
       }}
     >
       <Header
@@ -32,11 +36,13 @@ function App() {
         setSelectedTypes={setSelectedTypes}
         searchKeyword={searchKeyword}
         setSearchKeyword={setSearchKeyword}
+        isLoggedIn={isLoggedIn}
+        setIsLoggedIn={setIsLoggedIn}
       />
       <Box component="main" sx={{ flexGrow: 1 }}>
         <Routes>
           <Route path="/" element={<MainPage />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/mypage" element={<MyPage />} />
           <Route path="/report" element={<ReportPage />} />
@@ -46,7 +52,7 @@ function App() {
           <Route path="/board/write" element={<BoardWrite />} />
         </Routes>
       </Box>
-      {/* <Footer /> */}
+      <Footer />
     </Box>
   );
 }

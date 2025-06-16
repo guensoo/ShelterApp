@@ -18,10 +18,11 @@ const SearchBar = ({ onSearch }) => {
     <Box
       sx={{
         width: "100%",
+        height : "40px",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        py: 2,
+        // py: 2,
         bgcolor: "#fff",
       }}
     >

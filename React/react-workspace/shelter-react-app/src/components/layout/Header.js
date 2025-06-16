@@ -12,12 +12,32 @@ import { useNavigate } from "react-router-dom";
 import SearchBar from "../Search/SearchBar";
 import SidebarFilter from "../layout/SidebarFilter";
 
-const Header = () => {
+const Header = ({ isLoggedIn, setIsLoggedIn }) => {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    setIsLoggedIn(false);
+    navigate("/");
+  };
+
   return (
-    <>
+    <Box
+      component="header"
+      sx={{
+        width: "100%",
+        height: "60px",
+        px: 2,
+        padding: 0,
+        bgcolor: "#fafafa",
+        borderTop: "1px solid #eee",
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        fontSize: 14,
+      }}
+    >
       <AppBar position="static" color="default" elevation={1}>
         <Toolbar sx={{ justifyContent: "space-between", alignItems: "center" }}>
           {/* 좌측 로고 + 햄버거 */}
@@ -29,7 +49,7 @@ const Header = () => {
               src="/shelter_logo.png"
               alt="쉼:터"
               style={{
-                height: 80,
+                height: "100px",
                 width: "100px",
                 marginLeft: 8,
                 marginRight: 8,
@@ -40,12 +60,12 @@ const Header = () => {
           </Box>
 
           {/* 중앙 메뉴: 제보 + 검색창 + 자유게시판 */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2, backgroundColor: "transparent", }}>
             <Button color="primary" onClick={() => navigate("/report")}>
               제보합니다
             </Button>
 
-            <Box sx={{ minWidth: 240, maxWidth: 360 }}>
+            <Box sx={{ minWidth: 240, maxWidth: 360, }}>
               <SearchBar onSearch={() => {}} />
             </Box>
 
@@ -54,10 +74,19 @@ const Header = () => {
             </Button>
           </Box>
 
-          {/* 우측 로그인 / 회원가입 */}
+          {/* 🔥 우측 조건부 렌더링 */}
           <Box sx={{ display: "flex", gap: 1 }}>
-            <Button color="primary" onClick={() => navigate("/login")}>로그인</Button>
-            <Button color="primary" onClick={() => navigate("/signup")}>회원가입</Button>
+            {isLoggedIn ? (
+              <>
+                <Button color="primary" onClick={() => navigate("/mypage")}>마이페이지</Button>
+                <Button color="primary" onClick={handleLogout}>로그아웃</Button>
+              </>
+            ) : (
+              <>
+                <Button color="primary" onClick={() => navigate("/login")}>로그인</Button>
+                <Button color="primary" onClick={() => navigate("/signup")}>회원가입</Button>
+              </>
+            )}
           </Box>
         </Toolbar>
       </AppBar>
@@ -71,7 +100,7 @@ const Header = () => {
           </Button>
         </Box>
       </Drawer>
-    </>
+    </Box>
   );
 };
 

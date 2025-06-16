@@ -2,6 +2,7 @@ import { useState } from "react";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import MapContainer from "../components/Map/MapContainer";
+import ShelterDetail from "../components/Map/ShelterDetail";
 
 const DUMMY_SHELTERS = [
   { id: 1, name: "화학재난 대피소", type: "CHEMICAL", lat: 37.567, lng: 126.978 },
@@ -12,11 +13,17 @@ const DUMMY_SHELTERS = [
 ];
 
 const MainPage = () => {
-  const filteredShelters = (DUMMY_SHELTERS || []).filter(() => true);
+  const [selectedShelter, setSelectedShelter] = useState(null);
 
   return (
     <>
-      <MapContainer shelters={filteredShelters} />
+      <div style={{ position: "relative", width: "100%", height: "90vh" }}>
+        <MapContainer
+          shelters={DUMMY_SHELTERS}
+          onSelectShelter={setSelectedShelter}
+        />
+        <ShelterDetail shelter={selectedShelter} />
+      </div>
     </>
   );
 };
