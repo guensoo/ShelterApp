@@ -12,6 +12,8 @@ import Footer from './components/layout/Footer';
 import Header from './components/layout/Header';
 import BoardWrite from "./pages/Board/BoardWrite";
 import BoardEdit from './pages/Board/BoardEdit';
+import FindAccount from './pages/FindAccount';
+import { FavoriteProvider } from './context/FavoriteContext';
 import './App.css';
 
 function App() {
@@ -20,6 +22,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   return (
+    <FavoriteProvider>
       <Box
         sx={{
           minWidth: "940px",
@@ -44,6 +47,7 @@ function App() {
             <Route path="/" element={<MainPage />} searchKeyword={searchKeyword} />
             <Route path="/login" element={<LoginPage setIsLoggedIn={setIsLoggedIn} />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/findaccount" element={<FindAccount />} />
             <Route path="/mypage" element={<MyPage />} />
             <Route path="/report" element={<ReportPage />} />
             <Route path="/board" element={<BoardMain />} />
@@ -54,6 +58,7 @@ function App() {
         </Box>
         <Footer />
       </Box>
+    </FavoriteProvider>
   );
 }
 

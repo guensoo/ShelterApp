@@ -1,5 +1,9 @@
+/* global naver */
 import { useEffect, useRef, useState } from "react";
-import markerColors from "./markerColors"; // 색상 정의
+import markerColors from "./markerColors";
+import MyLocationIcon from '@mui/icons-material/MyLocation';
+import { Button } from '@mui/material';
+import { useNavigate } from "react-router-dom";
 
 const DEFAULT_CENTER = { lat: 37.5665, lng: 126.9780 };
 
@@ -8,6 +12,11 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
   const mapInstance = useRef(null);
   const [markers, setMarkers] = useState([]);
   const infoWindowRef = useRef(null);
+
+  const [favorites, setFavorites] = useState(() => {
+    return JSON.parse(localStorage.getItem("favorites") || "[]");
+  });
+  const navigate = useNavigate();
 
   const getInfoWindowContent = (shelter) => `
     <div style="padding:10px;max-width:230px;">
@@ -29,101 +38,165 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
 
   const addMapClickCloseEvent = () => {
     if (!mapInstance.current) return;
-    window.naver.maps.Event.addListener(mapInstance.current, "click", () => {
+    naver.maps.Event.addListener(mapInstance.current, "click", () => {
       if (infoWindowRef.current) infoWindowRef.current.close();
     });
   };
 
-  const addShelterMarkers = (shelterList) => {
-    clearMarkers();
-    const newMarkers = shelterList.map((shelter) => {
-      if (!shelter.lat || !shelter.lng) return null;
+  const renderCurrentLocationMarker = () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const myLocation = new naver.maps.LatLng(lat, lng);
 
-      const marker = new window.naver.maps.Marker({
-        position: new window.naver.maps.LatLng(shelter.lat, shelter.lng),
-        map: mapInstance.current,
-        icon: {
-          content: `
-            <div style="
-              width: 16px;
-              height: 16px;
-              background-color: ${markerColors[shelter.type] || markerColors.DEFAULT};
-              border-radius: 50%;
-              border: 2px solid white;
-              box-shadow: 0 0 2px rgba(0,0,0,0.3);
-            " title="${shelter.name}"></div>
-          `,
-          size: new window.naver.maps.Size(16, 16),
-          anchor: new window.naver.maps.Point(8, 8),
-        },
-      });
-
-      window.naver.maps.Event.addListener(marker, "click", () => {
-        mapInstance.current.panTo(new window.naver.maps.LatLng(shelter.lat, shelter.lng));
-        if (infoWindowRef.current) infoWindowRef.current.close();
-
-        infoWindowRef.current = new window.naver.maps.InfoWindow({
-          content: getInfoWindowContent(shelter),
-          disableAnchor: false,
-          pixelOffset: new window.naver.maps.Point(0, -10),
-          backgroundColor: "#fff",
-          borderColor: "#ccc",
-          borderWidth: 1,
-          maxWidth: 250,
+        const marker = new naver.maps.Marker({
+          position: myLocation,
+          map: mapInstance.current,
+          icon: {
+            content: `
+              <div style="
+                width: 18px;
+                height: 18px;
+                background-color:#1E90FF;
+                border: 2px solid white;
+                box-shadow: 0 0 6px rgba(30, 144, 255, 0.7);
+              " title="내 위치"></div>
+            `,
+            size: new naver.maps.Size(18, 18),
+            anchor: new naver.maps.Point(9, 9),
+          },
         });
 
-        infoWindowRef.current.open(mapInstance.current, marker);
+        const infoWindow = new naver.maps.InfoWindow({
+          content: `
+            <div style="
+              padding: 8px 12px;
+              font-size: 14px;
+              background: white;
+              border-radius: 6px;
+            ">
+              📍 내 위치
+            </div>
+          `,
+          pixelOffset: new naver.maps.Point(0, -10),
+        });
+        infoWindowRef.current = infoWindow;
 
-        setTimeout(() => {
-          const closeBtn = document.getElementById("close-infowindow-btn");
-          if (closeBtn) closeBtn.onclick = () => infoWindowRef.current.close();
+        naver.maps.Event.addListener(marker, "click", () => {
+          infoWindow.open(mapInstance.current, marker);
+        });
 
-          const detailBtn = document.getElementById("open-detail-btn");
-          if (detailBtn) detailBtn.onclick = () => {
-            onSelectShelter?.(shelter);
-            infoWindowRef.current.close();
-          };
-        }, 100);
+        mapInstance.current.setCenter(myLocation);
+      },
+      (err) => console.error("위치 허용 실패:", err)
+    );
+  };
+
+  const toggleFavorite = (shelter) => {
+    const isLoggedIn = !!localStorage.getItem("user");
+    if (!isLoggedIn) {
+      const confirmLogin = window.confirm("이 기능은 로그인 후 이용 가능합니다.\n로그인하시겠습니까?");
+      if (confirmLogin) navigate("/login");
+      return;
+    }
+
+    const exists = favorites.some(f => f.id === shelter.id);
+    const updated = exists
+      ? favorites.filter(f => f.id !== shelter.id)
+      : [...favorites, shelter];
+
+    setFavorites(updated);
+    localStorage.setItem("favorites", JSON.stringify(updated));
+  };
+
+  const createMarker = (shelter) => {
+    const marker = new naver.maps.Marker({
+      position: new naver.maps.LatLng(shelter.lat, shelter.lng),
+      map: mapInstance.current,
+      icon: {
+        content: `
+          <div style="
+            width: 16px;
+            height: 16px;
+            background-color: ${markerColors[shelter.type] || markerColors.DEFAULT};
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 2px rgba(0,0,0,0.3);
+          " title="${shelter.name}"></div>
+        `,
+        size: new naver.maps.Size(16, 16),
+        anchor: new naver.maps.Point(8, 8),
+      },
+    });
+
+    naver.maps.Event.addListener(marker, "click", () => {
+      mapInstance.current.panTo(new naver.maps.LatLng(shelter.lat, shelter.lng));
+      if (infoWindowRef.current) infoWindowRef.current.close();
+
+      infoWindowRef.current = new naver.maps.InfoWindow({
+        content: getInfoWindowContent(shelter),
+        disableAnchor: false,
+        pixelOffset: new naver.maps.Point(0, -10),
+        backgroundColor: "#fff",
+        borderColor: "#ccc",
+        borderWidth: 1,
+        maxWidth: 250,
       });
 
-      return marker;
-    }).filter(Boolean);
+      infoWindowRef.current.open(mapInstance.current, marker);
+
+      setTimeout(() => {
+        const closeBtn = document.getElementById("close-infowindow-btn");
+        if (closeBtn) closeBtn.onclick = () => infoWindowRef.current.close();
+
+        const detailBtn = document.getElementById("open-detail-btn");
+        if (detailBtn) detailBtn.onclick = () => {
+          onSelectShelter?.(shelter);
+          infoWindowRef.current.close();
+        };
+      }, 100);
+    });
+
+    return marker;
+  };
+
+  const addShelterMarkers = (shelterList) => {
+    clearMarkers();
+    const newMarkers = shelterList
+      .filter(shelter => shelter.lat && shelter.lng)
+      .map(createMarker);
     setMarkers(newMarkers);
   };
 
   useEffect(() => {
-    if (!window.naver || !window.naver.maps || !mapRef.current) return;
+    if (!naver || !naver.maps || !mapRef.current) return;
 
     const initializeMap = (lat, lng) => {
-      mapInstance.current = new window.naver.maps.Map(mapRef.current, {
-        center: new window.naver.maps.LatLng(lat, lng),
+      mapInstance.current = new naver.maps.Map(mapRef.current, {
+        center: new naver.maps.LatLng(lat, lng),
         zoom: 13,
       });
 
       addShelterMarkers(shelters);
       addMapClickCloseEvent();
+      renderCurrentLocationMarker();
     };
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => initializeMap(pos.coords.latitude, pos.coords.longitude),
-        () => initializeMap(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng)
-      );
-    } else {
-      initializeMap(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng);
-    }
-    // eslint-disable-next-line
+    navigator.geolocation.getCurrentPosition(
+      (pos) => initializeMap(pos.coords.latitude, pos.coords.longitude),
+      () => initializeMap(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng)
+    );
   }, []);
 
   useEffect(() => {
-    if (!window.naver || !window.naver.maps || !mapInstance.current || !keyword) return;
+    if (!naver || !naver.maps || !mapInstance.current || !keyword) return;
 
-    const geocoder = new window.naver.maps.services.Geocoder();
-
+    const geocoder = new naver.maps.services.Geocoder();
     geocoder.addressSearch(keyword, (result, status) => {
-      if (status === window.naver.maps.services.Status.OK && result.length > 0) {
+      if (status === naver.maps.services.Status.OK && result.length > 0) {
         const { y, x } = result[0];
-        const latlng = new window.naver.maps.LatLng(y, x);
+        const latlng = new naver.maps.LatLng(y, x);
         mapInstance.current.setCenter(latlng);
         mapInstance.current.setZoom(16);
       } else {
@@ -133,70 +206,30 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
   }, [keyword]);
 
   useEffect(() => {
-    if (!window.naver || !window.naver.maps || !mapInstance.current) return;
-
+    if (!naver || !naver.maps || !mapInstance.current) return;
     markers.forEach(marker => marker.setMap(null));
-
-    const newMarkers = shelters.map((shelter) => {
-      if (!shelter.lat || !shelter.lng) return null;
-
-      const marker = new window.naver.maps.Marker({
-        position: new window.naver.maps.LatLng(shelter.lat, shelter.lng),
-        map: mapInstance.current,
-        icon: {
-          content: `
-            <div style="
-              width: 16px;
-              height: 16px;
-              background-color: ${markerColors[shelter.type] || markerColors.DEFAULT};
-              border-radius: 50%;
-              border: 2px solid white;
-              box-shadow: 0 0 2px rgba(0,0,0,0.3);
-            " title="${shelter.name}"></div>
-          `,
-          size: new window.naver.maps.Size(16, 16),
-          anchor: new window.naver.maps.Point(8, 8),
-        },
-      });
-
-      window.naver.maps.Event.addListener(marker, "click", () => {
-        mapInstance.current.panTo(new window.naver.maps.LatLng(shelter.lat, shelter.lng));
-        if (infoWindowRef.current) infoWindowRef.current.close();
-
-        infoWindowRef.current = new window.naver.maps.InfoWindow({
-          content: getInfoWindowContent(shelter),
-          disableAnchor: false,
-          pixelOffset: new window.naver.maps.Point(0, -10),
-          backgroundColor: "#fff",
-          borderColor: "#ccc",
-          borderWidth: 1,
-          maxWidth: 250,
-        });
-
-        infoWindowRef.current.open(mapInstance.current, marker);
-
-        setTimeout(() => {
-          const closeBtn = document.getElementById("close-infowindow-btn");
-          if (closeBtn) closeBtn.onclick = () => infoWindowRef.current.close();
-
-          const detailBtn = document.getElementById("open-detail-btn");
-          if (detailBtn) detailBtn.onclick = () => {
-            onSelectShelter?.(shelter);
-            infoWindowRef.current.close();
-          };
-        }, 100);
-      });
-
-      return marker;
-    }).filter(Boolean);
-
+    const newMarkers = shelters
+      .filter(shelter => shelter.lat && shelter.lng)
+      .map(createMarker);
     setMarkers(newMarkers);
-
-    window.naver.maps.Event.addListener(mapInstance.current, "click", () => {
-      if (infoWindowRef.current) infoWindowRef.current.close();
-    });
-    // eslint-disable-next-line
   }, [shelters]);
+
+  const handleMoveToMyLocation = () => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const myLat = pos.coords.latitude;
+        const myLng = pos.coords.longitude;
+        const myLocation = new naver.maps.LatLng(myLat, myLng);
+        if (mapInstance.current) {
+          mapInstance.current.setCenter(myLocation);
+        }
+      },
+      (err) => {
+        alert("위치 접근을 허용해주세요.");
+        console.error("❌ 위치 접근 오류:", err);
+      }
+    );
+  };
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
@@ -205,6 +238,26 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
         id="map"
         style={{ width: "100%", height: "90vh", minHeight: 400 }}
       />
+      <Button
+        variant="contained"
+        color="primary"
+        size="small"
+        sx={{
+          position: 'absolute',
+          bottom: 16,
+          right: 16,
+          zIndex: 1000,
+          borderRadius: '50%',
+          minWidth: 'auto',
+          width: 48,
+          height: 48,
+          padding: 0,
+          boxShadow: 3,
+        }}
+        onClick={handleMoveToMyLocation}
+      >
+        <MyLocationIcon />
+      </Button>
     </div>
   );
 };

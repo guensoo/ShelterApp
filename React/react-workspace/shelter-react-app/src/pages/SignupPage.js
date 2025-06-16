@@ -15,6 +15,17 @@ const SignupPage = () => {
   const [pwCheck, setPwCheck] = useState("");
   const [pwMatch, setPwMatch] = useState(null);
   const navigate = useNavigate();
+  const isValidEmail = (email) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState(false);
+
+  const handleEmailChange = (e) => {
+    const val = e.target.value;
+    setEmail(val);
+    setEmailError(val !== '' && !isValidEmail(val));
+  };
 
   // 아이디 검사
   const handleIdChange = (e) => {
@@ -44,7 +55,7 @@ const SignupPage = () => {
   };
 
   return (
-    <Box sx={{ minHeight: "84vh", bgcolor: "#f3f6fa", display: "flex", justifyContent: "center", alignItems: "center" }}>
+    <Box sx={{ minHeight: "89.4vh", bgcolor: "#f3f6fa", display: "flex", justifyContent: "center", alignItems: "center" }}>
       <Card sx={{ minWidth: 320, maxWidth: 400, width: "100%", borderRadius: 4, boxShadow: 6 }}>
         <CardContent>
           <Typography variant="h5" mb={2} color="primary" fontWeight="bold" textAlign="center" marginTop="10px">
@@ -81,6 +92,17 @@ const SignupPage = () => {
                     </InputAdornment>
                   ) : null,
               }}
+            />
+            <TextField
+              label="이메일"
+              fullWidth
+              required
+              margin="dense"
+              value={email}
+              onChange={handleEmailChange}
+              error={emailError}
+              helperText={emailError ? '유효한 이메일을 입력하세요' : ' '}
+              sx={{ mb: 1 }}
             />
             <TextField
               label="비밀번호"
@@ -146,7 +168,21 @@ const SignupPage = () => {
               회원가입
             </Button>
           </form>
-          <Button fullWidth color="secondary" sx={{ mt: 1 }} onClick={() => navigate("/login")}>
+          <Button
+            fullWidth
+            variant="text"
+            onClick={() => navigate("/login")}
+            sx={{
+              mt: 1,
+              color: '#1976d2',
+              fontWeight: 600,
+              '&:hover': {
+                backgroundColor: 'transparent',
+                textDecoration: 'underline',
+                color: '#115293'
+              }
+            }}
+          >
             이미 회원이신가요? 로그인
           </Button>
         </CardContent>

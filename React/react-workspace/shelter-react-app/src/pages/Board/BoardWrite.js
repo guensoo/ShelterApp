@@ -3,11 +3,13 @@ import "suneditor/dist/css/suneditor.min.css";
 import { Box, TextField, Typography, Button } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ImageDrop from './ImageDrop';
 
 const BoardWrite = () => {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
   const handleSubmit = () => {
     const cleanContent = content.replace(/<(.|\n)*?>/g, '').trim();
@@ -48,6 +50,7 @@ const BoardWrite = () => {
           ],
         }}
       />
+      <ImageDrop onFilesSelected={setUploadedFiles} />
       <Box sx={{ mt: 2, textAlign: "right" }}>
         <Button variant="contained" onClick={handleSubmit}>
           등록

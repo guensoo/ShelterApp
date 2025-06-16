@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Card, CardContent, TextField, Button, Typography } from "@mui/material";
+import FindAccount from './FindAccount';
 
 const DUMMY_USER = {
   userId: "asdf1234",
@@ -37,7 +38,7 @@ const LoginPage = ({setIsLoggedIn }) => {
   };
 
   return (
-    <Box sx={{ minHeight: "84vh", bgcolor: "#f3f6fa", display: "flex", justifyContent: "center", alignItems: "center" }}>
+    <Box sx={{ minHeight: "89.4vh", bgcolor: "#f3f6fa", display: "flex", justifyContent: "center", alignItems: "center" }}>
       <Card sx={{ minWidth: 320, maxWidth: 400, width: "100%", borderRadius: 4, boxShadow: 6 }}>
         <CardContent>
           <Typography variant="h5" mb={2} color="primary" fontWeight="bold" textAlign="center" marginTop="10px">
@@ -67,7 +68,38 @@ const LoginPage = ({setIsLoggedIn }) => {
               로그인
             </Button>
           </form>
-          <Button fullWidth color="secondary" sx={{ mt: 1 }} onClick={() => navigate("/signup")}>
+          <Button
+            fullWidth
+            variant="text"
+            onClick={() => navigate("/findaccount")}
+            sx={{
+              mt: 1,
+              color: '#4caf50',
+              fontWeight: 600,
+              '&:hover': {
+                backgroundColor: 'transparent',
+                textDecoration: 'underline',
+                color: '#388e3c'
+              }
+            }}
+          >
+            아이디 혹은 비밀번호를 잊으셨나요?
+          </Button>
+          <Button
+            fullWidth
+            variant="text"
+            onClick={() => navigate("/signup")}
+            sx={{
+              mt: 1,
+              color: '#1976d2',
+              fontWeight: 600,
+              '&:hover': {
+                backgroundColor: 'transparent',
+                textDecoration: 'underline',
+                color: '#115293'
+              }
+            }}
+          >
             아직 회원이 아니신가요? 회원가입
           </Button>
         </CardContent>

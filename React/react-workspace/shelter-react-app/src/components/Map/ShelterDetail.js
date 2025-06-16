@@ -3,9 +3,30 @@ import RoomIcon from '@mui/icons-material/Room';
 import PhoneIcon from '@mui/icons-material/Phone';
 import PeopleIcon from '@mui/icons-material/People';
 import InfoIcon from '@mui/icons-material/Info';
+import StarIcon from '@mui/icons-material/Star';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import { useFavorite } from "../../context/FavoriteContext";
+import { useNavigate } from "react-router-dom"; // ✅ 추가
 
 const ShelterDetail = ({ shelter, onClose }) => {
+  const navigate = useNavigate(); // ✅ 추가
+  const { toggleFavorite, isFavorited } = useFavorite();
   if (!shelter) return null;
+
+  const isLiked = isFavorited(shelter.id);
+
+  const handleFavoriteClick = () => {
+    const isLoggedIn = Boolean(localStorage.getItem("user")); // ✅ 로그인 여부 판단 (예시)
+    if (!isLoggedIn) {
+      const confirmLogin = window.confirm("로그인이 필요합니다. 로그인하시겠습니까?");
+      if (confirmLogin) {
+        navigate("/login"); // ✅ 로그인 페이지로 이동
+      }
+      return;
+    }
+
+    toggleFavorite(shelter); // 로그인 된 경우만 즐겨찾기 동작
+  };
 
   return (
     <Box
@@ -18,7 +39,7 @@ const ShelterDetail = ({ shelter, onClose }) => {
         alignItems: "center",
         justifyContent: "center",
       }}
-      onClick={onClose} // 배경 클릭 시 닫힘
+      onClick={onClose}
     >
       <Box
         sx={{
@@ -28,12 +49,22 @@ const ShelterDetail = ({ shelter, onClose }) => {
           boxShadow: 6,
           p: 3,
         }}
-        onClick={e => e.stopPropagation()} // 내부 클릭 시 닫힘 방지
+        onClick={e => e.stopPropagation()}
       >
-        <Typography variant="h6" sx={{ mb: 1, fontWeight: "bold" }}>
-          {shelter.name || "우리 무더위 쉼터"}
-        </Typography>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            {shelter.name || "우리 무더위 쉼터"}
+          </Typography>
+          <Button
+            onClick={handleFavoriteClick} // ✅ 여기에 핸들러 연결
+            sx={{ minWidth: "auto", padding: 0 }}
+          >
+            {isLiked ? <StarIcon sx={{ color: "#FFD700" }} /> : <StarBorderIcon sx={{ color: "#999" }} />}
+          </Button>
+        </Box>
+
         <Divider sx={{ mb: 1 }} />
+
         <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0.5 }}>
           <RoomIcon fontSize="small" color="action" />
           <Typography variant="body2">{shelter.addr || "주소 없음"}</Typography>
@@ -60,7 +91,7 @@ const ShelterDetail = ({ shelter, onClose }) => {
         <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
           {shelter.addr && (
             <Button
-              variant="contained" // ✅ 파란 배경
+              variant="contained"
               size="small"
               color="primary"
               href={`https://map.naver.com/p/search/${encodeURIComponent(shelter.addr)}`}
@@ -72,9 +103,9 @@ const ShelterDetail = ({ shelter, onClose }) => {
             </Button>
           )}
           <Button
-            variant="outlined" // ✅ 흰 배경 + 테두리
+            variant="outlined"
             size="small"
-            color="inherit"    // ✅ 검정 글씨
+            color="inherit"
             onClick={e => {
               e.stopPropagation();
               onClose();
