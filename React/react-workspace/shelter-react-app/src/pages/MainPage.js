@@ -1,30 +1,67 @@
-import { useState } from "react";
-import Header from "../components/layout/Header";
-import Footer from "../components/layout/Footer";
+import { useContext, useEffect, useState } from "react";
 import MapContainer from "../components/Map/MapContainer";
 import ShelterDetail from "../components/Map/ShelterDetail";
+import { ShelterFilterContext } from "../context/ShelterFilterContext";
+import HEAT from "../data/DUMMY_HEAT_SHELTERS";
+import COLD from "../data/DUMMY_COLD_SHELTERS";
+import CHEMICAL from "../data/DUMMY_CHEMICAL_SHELTERS";
+import CIVIL_DEFENSE from "../data/DUMMY_CIVIL_DEFENSE_SHELTERS";
+import EARTHQUAKE_TSUNAMI from "../data/DUMMY_EARTHQUAKE_TSUNAMI_SHELTERS";
 
-const DUMMY_SHELTERS = [
-  { id: 1, name: "화학재난 대피소", type: "CHEMICAL", lat: 37.567, lng: 126.978 },
-  { id: 2, name: "민방위 대피소(전쟁)", type: "CIVIL_DEFENSE", lat: 37.565, lng: 126.976 },
-  { id: 3, name: "지진/해일 대피소", type: "EARTHQUAKE_TSUNAMI", lat: 37.563, lng: 126.980 },
-  { id: 4, name: "무더위 쉼터", type: "HEAT", lat: 37.561, lng: 126.979 },
-  { id: 5, name: "한파 쉼터", type: "COLD", lat: 37.559, lng: 126.977 },
-];
+const ALL_SHELTERS = {
+  HEAT,
+  COLD,
+  CHEMICAL,
+  CIVIL_DEFENSE,
+  EARTHQUAKE_TSUNAMI,
+};
 
 const MainPage = () => {
+  const { selectedTypes, searchKeyword } = useContext(ShelterFilterContext); // ✅ 전역 필터 불러오기
+  const [filteredShelters, setFilteredShelters] = useState([]);
   const [selectedShelter, setSelectedShelter] = useState(null);
 
+  useEffect(() => {
+    if (!selectedTypes || selectedTypes.length === 0) {
+      setFilteredShelters([]);
+      return;
+    }
+
+    let result;
+
+    if (selectedTypes.includes("ALL")) {
+      // 전체 선택 시 모든 마커
+      result = Object.values(ALL_SHELTERS).flat();
+    } else {
+      result = selectedTypes
+        .map((type) => ALL_SHELTERS[type] || [])
+        .flat();
+    }
+
+    // 🔍 키워드까지 필터링
+    if (searchKeyword) {
+      result = result.filter((shelter) =>
+        shelter.name.includes(searchKeyword)
+      );
+    }
+
+    setFilteredShelters(result);
+  }, [selectedTypes, searchKeyword]);
+
   return (
-    <>
-      <div style={{ position: "relative", width: "100%", height: "90vh" }}>
-        <MapContainer
-          shelters={DUMMY_SHELTERS}
-          onSelectShelter={setSelectedShelter}
+    <div style={{ position: "relative", width: "100%", height: "90vh" }}>
+      <MapContainer
+        shelters={filteredShelters}
+        keyword={searchKeyword}
+        onSelectShelter={setSelectedShelter}
+      />
+      {selectedShelter && (
+        <ShelterDetail
+          shelter={selectedShelter}
+          onClose={() => setSelectedShelter(null)}
         />
-        <ShelterDetail shelter={selectedShelter} />
-      </div>
-    </>
+      )}
+    </div>
   );
 };
 

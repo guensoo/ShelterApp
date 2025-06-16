@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   AppBar,
   Toolbar,
@@ -27,9 +27,10 @@ const Header = ({ isLoggedIn, setIsLoggedIn }) => {
       component="header"
       sx={{
         width: "100%",
-        height: "60px",
+        minHeight: "60px !important",
         px: 2,
         padding: 0,
+        margin: 0,
         bgcolor: "#fafafa",
         borderTop: "1px solid #eee",
         display: "flex",
@@ -39,7 +40,7 @@ const Header = ({ isLoggedIn, setIsLoggedIn }) => {
       }}
     >
       <AppBar position="static" color="default" elevation={1}>
-        <Toolbar sx={{ justifyContent: "space-between", alignItems: "center" }}>
+        <Toolbar sx={{ justifyContent: "space-between", alignItems: "center", height: "10px",}}>
           {/* 좌측 로고 + 햄버거 */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <IconButton edge="start" onClick={() => setDrawerOpen(true)}>

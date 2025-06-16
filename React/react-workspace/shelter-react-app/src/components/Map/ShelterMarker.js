@@ -18,7 +18,7 @@ const ShelterMarker = ({ map, shelter, onClick }) => {
           <div style="
             width: 16px;
             height: 16px;
-            background-color: ${markerColor};
+            background-color: ${markerColors[shelter.type] || markerColors.DEFAULT};
             border-radius: 50%;
             border: 2px solid white;
             box-shadow: 0 0 2px rgba(0,0,0,0.3);

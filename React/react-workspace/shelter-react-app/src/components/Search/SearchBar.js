@@ -7,22 +7,24 @@ const SearchBar = ({ onSearch }) => {
 
   const handleSearch = () => {
     if (keyword.trim() === "") return;
-    onSearch(keyword.trim()); // 부모(MainPage)에 전달
+    onSearch(keyword.trim());
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleSearch();
+  const handleSubmit = (e) => {
+    e.preventDefault(); // 🔥 기본 제출 막기
+    handleSearch();
   };
 
   return (
     <Box
+      component="form"
+      onSubmit={handleSubmit} // 🔥 Enter 누를 때 실행됨
       sx={{
         width: "100%",
-        height : "40px",
+        height: "40px",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        // py: 2,
         bgcolor: "#fff",
       }}
     >
@@ -32,10 +34,15 @@ const SearchBar = ({ onSearch }) => {
         size="small"
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
-        onKeyDown={handleKeyDown}
         sx={{ width: 320, maxWidth: "80vw" }}
       />
-      <IconButton onClick={handleSearch} sx={{ ml: 1 }}>
+      <IconButton
+        type="submit" // 🔥 이 버튼도 form 제출용
+        style={{
+          backgroundColor: "#f5f5f5",
+          borderRadius: 0,
+        }}
+      >
         <SearchIcon />
       </IconButton>
     </Box>

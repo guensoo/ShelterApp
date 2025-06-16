@@ -26,7 +26,7 @@ const BoardMain = () => {
   const handlePostClick = (id) => navigate(`/board/${id}`);
 
   return (
-    <Box sx={{ px: 3, py: 5, maxWidth: 1000, mx: "auto" }}>
+    <Box sx={{ px: 3, py: 5, maxWidth: 1000, mx: "auto", minHeight : "857px" }}>
       <Typography variant="h4" gutterBottom textAlign="center">
         📌 자유게시판
       </Typography>

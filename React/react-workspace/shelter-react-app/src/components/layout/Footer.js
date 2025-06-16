@@ -7,7 +7,7 @@ const Footer = () => {
       component="footer"
       sx={{
         width: "100%",
-        height: "35px",
+        height: "30px",
         px: 2,
         padding: 1,
         bgcolor: "#fafafa",
