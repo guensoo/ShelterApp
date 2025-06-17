@@ -1,7 +1,11 @@
 package com.shelter.shelter_api.Entity;
 
+import com.shelter.shelter_api.Enum.Role;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,6 +40,7 @@ public class UserEntity {
     @Column(nullable = false, unique = true)
     private String nickname;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String role;
+    private Role role = Role.USER;
 }

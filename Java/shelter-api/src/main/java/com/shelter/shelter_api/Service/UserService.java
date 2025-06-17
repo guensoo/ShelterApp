@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import com.shelter.shelter_api.DTO.LoginRequest;
 import com.shelter.shelter_api.DTO.SignupRequest;
 import com.shelter.shelter_api.Entity.UserEntity;
+import com.shelter.shelter_api.Enum.Role;
 import com.shelter.shelter_api.Repository.UserRepository;
 import com.shelter.shelter_api.Security.JwtProvider;
 
@@ -32,7 +33,7 @@ public class UserService {
             .username(dto.getUsername())
             .password(passwordEncoder.encode(dto.getPassword()))
             .nickname(dto.getNickname())
-            .role("USER")
+            .role(Role.USER)
             .build();
         userRepository.save(user);
     }
@@ -46,6 +47,6 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
-        return jwtProvider.createToken(user.getUsername(), user.getRole());
+        return jwtProvider.createToken(user.getUsername(), user.getRole().name());
     }
 }
