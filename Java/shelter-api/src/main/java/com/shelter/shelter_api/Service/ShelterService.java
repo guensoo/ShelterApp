@@ -1,68 +1,72 @@
 package com.shelter.shelter_api.Service;
 
-import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.http.ResponseEntity;
-import com.shelter.shelter_api.DTO.ShelterDTO;
-import com.shelter.shelter_api.Entity.ShelterEntity;
-import com.shelter.shelter_api.Repository.ShelterRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Slf4j
+import org.springframework.stereotype.Service;
+
+import com.shelter.shelter_api.DTO.ShelterDTO;
+import com.shelter.shelter_api.Repository.ChemicalShelterRepository;
+import com.shelter.shelter_api.Repository.ColdShelterRepository;
+import com.shelter.shelter_api.Repository.DefenseShelterRepository;
+import com.shelter.shelter_api.Repository.EarthquakeShelterRepository;
+import com.shelter.shelter_api.Repository.HeatShelterRepository;
+
+import lombok.RequiredArgsConstructor;
+
 @Service
 @RequiredArgsConstructor
 public class ShelterService {
+    private final HeatShelterRepository heatShelterRepo;
+    private final ColdShelterRepository coldShelterRepo;
+    private final ChemicalShelterRepository chemicalShelterRepo;
+    private final DefenseShelterRepository defenseShelterRepo;
+    private final EarthquakeShelterRepository earthquakeShelterRepo;
 
-    // 생성자 주입!(레파지토리 -> 인터페이스입니다.)
-    private final ShelterRepository repository;
-
-    // Shelter 추가 메서드
-    public List<ShelterDTO> create(ShelterDTO dto){
-        // DTO로 받은 객체 dto를 entity타입으로 변경
-        ShelterEntity entity = ShelterDTO.toEntity(dto);
-        // 데이터베이스에 저장
-        repository.save(entity);
-        return repository.findAll().stream().map(ShelterDTO::new).collect(Collectors.toList());
+    // 무더위쉼터 전체 조회
+    public List<ShelterDTO> getAllHeatShelters() {
+        return heatShelterRepo.findAll().stream()
+                .map(ShelterDTO::fromHeat)
+                .collect(Collectors.toList());
     }
 
-    //모든 쉘터 조회(지역명이 들어가 있다면 지역명에 대해서만 조회)
-    public List<ShelterDTO> getFilteredShelter(ShelterDTO area){
-        // 일단 전체 조회를 한다.
-        List<ShelterEntity> shelters = repository.findAll();
-        // 구역 필터링(원하는 구역(area)가 있을 경우)
-        if(area != null && area.getArea() != null) {
-            shelters = shelters
-                    .stream()
-                    .filter(shelter -> shelter.getArea() != null && shelter.getArea().contains(area.getArea()))
-                    .collect(Collectors.toList());
-        }
-
-        return shelters.stream().map(ShelterDTO::new).collect(Collectors.toList());
+    // 한파쉼터 전체 조회
+    public List<ShelterDTO> getAllColdShelters() {
+        return coldShelterRepo.findAll().stream()
+                .map(ShelterDTO::fromCold)
+                .collect(Collectors.toList());
     }
 
-    public void fetchSheltersFromGov() {
-        String apiKey = "T7QQZrCmgbCm2X9dLNzQljBdOAdh9EmUUzFTsd2N4FMVjB7LvhX06T9JLO2WW1jFYsIJlp2D%2FNaXweMt13Axyw%3D%3D";
-        String url = "https://apis.data.go.kr/1741000/HealthSheltersForEachRegion";
+    // 화학대피소 전체 조회
+    public List<ShelterDTO> getAllChemicalShelters() {
+        return chemicalShelterRepo.findAll().stream()
+                .map(ShelterDTO::fromChemical)
+                .collect(Collectors.toList());
+    }
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url)
-                .queryParam("serviceKey", apiKey)
-                .queryParam("pageNo", 1)
-                .queryParam("numOfRows", 100)
-                .queryParam("type", "xml");
+    // 민방위(일반) 대피소 전체 조회
+    public List<ShelterDTO> getAllDefenseShelters() {
+        return defenseShelterRepo.findAll().stream()
+                .map(ShelterDTO::fromCivil)
+                .collect(Collectors.toList());
+    }
 
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> response = restTemplate.getForEntity(builder.toUriString(), String.class);
+    // 지진해일 대피소 전체 조회
+    public List<ShelterDTO> getAllEarthquakeShelters() {
+        return earthquakeShelterRepo.findAll().stream()
+                .map(ShelterDTO::fromEarthquake)
+                .collect(Collectors.toList());
+    }
 
-        if (response.getStatusCode().is2xxSuccessful()) {
-            System.out.println("✅ XML 응답 확인:\n" + response.getBody());
-            // 여기서 JacksonXmlMapper로 파싱 예정
-        } else {
-            System.out.println("❌ 요청 실패: " + response.getStatusCode());
-        }
+    // 통합 전체 조회 (필터링)
+    public List<ShelterDTO> getAllShelters() {
+        List<ShelterDTO> all = new ArrayList<>();
+        all.addAll(getAllHeatShelters());
+        all.addAll(getAllColdShelters());
+        all.addAll(getAllChemicalShelters());
+        all.addAll(getAllDefenseShelters());
+        all.addAll(getAllEarthquakeShelters());
+        return all;
     }
 }
