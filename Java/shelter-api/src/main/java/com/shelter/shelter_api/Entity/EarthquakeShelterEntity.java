@@ -23,16 +23,19 @@ public class EarthquakeShelterEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String thingsMngNo;  // 사물관리번호 (THINGS_MNG_NO)
-    private String thingsNm;     // 사물명 (THINGS_NM)
-    private String addr;         // 주소 (ADDR)
-    private String ctpvNm;       // 시도명 (CTPV_NM)
-    private String sggNm;        // 시군구명 (SGG_NM)
-    private String emdNm;        // 읍면동명 (EMD_NM)
-    private String roadNm;       // 도로명 (ROAD_NM)
+    private String thingsMngNo;  // 사물관리번호
+    private String thingsNm;     // 사물명
 
-    private Double lon;          // 경도 (XMAP_CRTS or GEOM에서 파싱)
-    private Double lat;          // 위도 (YMAP_CRTS or GEOM에서 파싱)
+    private String ctpvNm;       // 시도명
+    private String sggNm;        // 시군구명
+    private String emdNm;        // 읍면동명
+    private String roadNm;       // 도로명
 
-    private String geom;         // GEOM (POINT 타입 원본, 필요시)
+    private Integer addrMno;     // 주소 본번
+    private Integer addrSno;     // 주소 부번
+
+    private Double lon;          // 경도 (XMAP_CRTS)
+    private Double lat;          // 위도 (YMAP_CRTS)
+
+    private String geom;         // GEOM 원본 저장
 }

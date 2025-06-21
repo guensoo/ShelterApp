@@ -88,19 +88,26 @@ public class ShelterDTO {
             .remark(e.getRmrk())
             .build();
     }
-    
-    // DefenseShelter(지진해일)
+
+    // EarthquakeShelter(지진해일)
     public static ShelterDTO fromEarthquake(EarthquakeShelterEntity e) {
         return ShelterDTO.builder()
-            .id(e.getId())
-            .name(e.getThingsNm()) // 예시: 사물명
-            .address(e.getAddr() != null ? e.getAddr() : (e.getRoadNm() != null ? e.getRoadNm() : e.getCtpvNm() + " " + e.getSggNm()))
-            .lat(e.getLat())
-            .lng(e.getLon())
-            .type(ShelterType.EARTHQUAKE)
-            .phone(null)
-            .capacity(null)
-            .remark(null)
-            .build();
+                .id(e.getId())
+                .name(e.getThingsNm()) // 사물명
+                .address(
+                        (e.getRoadNm() != null ? e.getRoadNm() : "") +
+                                (e.getAddrMno() != null ? " " + e.getAddrMno() : "") +
+                                (e.getAddrSno() != null && e.getAddrSno() > 0 ? "-" + e.getAddrSno() : "") +
+                                " " + e.getEmdNm() +
+                                " " + e.getSggNm() +
+                                " " + e.getCtpvNm()
+                )
+                .lat(e.getLat())
+                .lng(e.getLon())
+                .type(ShelterType.EARTHQUAKE)
+                .phone(null)
+                .capacity(null)
+                .remark(null)
+                .build();
     }
 }

@@ -1,22 +1,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Card, CardContent, TextField, Button, Typography } from "@mui/material";
-import FindAccount from './FindAccount';
+import { useAlert } from "../context/AlertContext";
+import { useAuth } from "../context/AuthContext";
 
-const DUMMY_USER = {
-  userId: "asdf1234",
-  userNickName: "나예요",
-  password: "asdf1234!",
-  point: 1000
-};
+const DUMMY_USER = [
+  {
+    userId: "asdf1234",
+    userNickName: "나예요",
+    password: "asdf1234!",
+    point: 1000
+  },
+  {
+    userId: "admin",
+    userNickName: "관리자",
+    password: "admin1234!",
+    point: 9999
+  }
+];
 
-const LoginPage = ({setIsLoggedIn }) => {
+const LoginPage = ({ setIsLoggedIn }) => {
   const [userId, setUserId] = useState("");
   const [pw, setPw] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
+  const { login } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!userId || !pw) {
@@ -24,16 +35,26 @@ const LoginPage = ({setIsLoggedIn }) => {
       return;
     }
 
-    if (userId !== DUMMY_USER.userId || pw !== DUMMY_USER.password) {
+    const matchedUser = DUMMY_USER.find(
+      (user) => user.userId === userId && user.password === pw
+    );
+
+    if (!matchedUser) {
       setErrorMsg("아이디 또는 비밀번호가 다릅니다.");
       return;
     }
 
-    // 로그인 성공
-    localStorage.setItem("loginUser", JSON.stringify(DUMMY_USER));
+    login(matchedUser);
     setIsLoggedIn(true);
     setErrorMsg("");
-    alert("로그인 성공!");
+
+    await showAlert({
+      title: matchedUser.userId.toLowerCase() === "admin"
+        ? "관리자로 로그인되었습니다."
+        : "로그인 성공!",
+      icon: "success",
+    });
+
     navigate("/");
   };
 
@@ -41,7 +62,7 @@ const LoginPage = ({setIsLoggedIn }) => {
     <Box sx={{ minHeight: "89.4vh", bgcolor: "#f3f6fa", display: "flex", justifyContent: "center", alignItems: "center" }}>
       <Card sx={{ minWidth: 320, maxWidth: 400, width: "100%", borderRadius: 4, boxShadow: 6 }}>
         <CardContent>
-          <Typography variant="h5" mb={2} color="primary" fontWeight="bold" textAlign="center" marginTop="10px">
+          <Typography variant="h5" mb={2} color="primary" fontWeight="bold" textAlign="center" mt="10px">
             로그인
           </Typography>
           <form onSubmit={handleSubmit}>
@@ -64,7 +85,12 @@ const LoginPage = ({setIsLoggedIn }) => {
               error={!!errorMsg}
               helperText={errorMsg || ""}
             />
-            <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, fontWeight: 600, borderRadius: 2 }}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 2, fontWeight: 600, borderRadius: 2 }}
+            >
               로그인
             </Button>
           </form>
@@ -74,13 +100,13 @@ const LoginPage = ({setIsLoggedIn }) => {
             onClick={() => navigate("/findaccount")}
             sx={{
               mt: 1,
-              color: '#4caf50',
+              color: "#4caf50",
               fontWeight: 600,
-              '&:hover': {
-                backgroundColor: 'transparent',
-                textDecoration: 'underline',
-                color: '#388e3c'
-              }
+              "&:hover": {
+                backgroundColor: "transparent",
+                textDecoration: "underline",
+                color: "#388e3c",
+              },
             }}
           >
             아이디 혹은 비밀번호를 잊으셨나요?
@@ -91,13 +117,13 @@ const LoginPage = ({setIsLoggedIn }) => {
             onClick={() => navigate("/signup")}
             sx={{
               mt: 1,
-              color: '#1976d2',
+              color: "#1976d2",
               fontWeight: 600,
-              '&:hover': {
-                backgroundColor: 'transparent',
-                textDecoration: 'underline',
-                color: '#115293'
-              }
+              "&:hover": {
+                backgroundColor: "transparent",
+                textDecoration: "underline",
+                color: "#115293",
+              },
             }}
           >
             아직 회원이 아니신가요? 회원가입

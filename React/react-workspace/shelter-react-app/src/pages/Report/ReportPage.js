@@ -2,20 +2,30 @@ import { Box, Typography, Paper } from "@mui/material";
 import ReportForm from "./ReportForm";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {useAuth} from "../../context/AuthContext"
+import { useAlert } from "../../context/AlertContext";
 
 const ReportPage = () => {
   const navigate = useNavigate();
+  const { isLoggedIn, isLoading } = useAuth();
+  const { showAlert } = useAlert();
   const [isLoginChecked, setIsLoginChecked] = useState(false); // 🔑
 
   useEffect(() => {
-    const loginUser = localStorage.getItem("loginUser");
-    if (!loginUser) {
-      alert("로그인이 필요합니다.");
-      navigate("/login");
-    } else {
-      setIsLoginChecked(true);
+    if (!isLoading) {
+      if (!isLoggedIn) {
+        showAlert({
+          icon: "warning",
+          title: "로그인이 필요합니다.",
+          text: "로그인 후 이용해주세요.",
+        }).then(() => {
+          navigate("/login");
+        });
+      } else {
+        setIsLoginChecked(true);
+      }
     }
-  }, [navigate]);
+  }, [isLoading, isLoggedIn, navigate, showAlert]);
 
   if (!isLoginChecked) return null;
 

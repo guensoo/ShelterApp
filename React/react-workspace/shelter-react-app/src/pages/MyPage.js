@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Typography, List, ListItem, ListItemText, Divider, Paper } from "@mui/material";
 import { useFavorite } from "../context/FavoriteContext";
+import { useAlert } from "../context/AlertContext";
 import mockPosts from "../data/mockPosts";
 import DUMMY_HEAT_SHELTERS from "../data/DUMMY_HEAT_SHELTERS";
 import DUMMY_COLD_SHELTERS from "../data/DUMMY_COLD_SHELTERS";
@@ -22,18 +23,25 @@ const MyPage = () => {
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
   const { favorites } = useFavorite();
   const [favoriteShelterIds, setFavoriteShelterIds] = useState([]);
+  
+  const { showAlert } = useAlert();
 
   // [스크랩한 게시글 id 배열]
   const [scrapPostIds, setScrapPostIds] = useState([]);
 
   useEffect(() => {
     if (!loginUser) {
-      alert("로그인이 필요합니다.");
-      navigate("/login");
+      showAlert({
+        title: "로그인이 필요합니다.",
+        text: "로그인 후 이용해주세요.",
+        icon: "warning",
+      }).then(() => {
+        navigate("/login");
+      });
       return;
     }
     setScrapPostIds(JSON.parse(localStorage.getItem("scrapPosts") || "[]"));
-  }, [navigate]);
+  }, [loginUser, navigate, showAlert]);
 
   useEffect(() => {
     setFavoriteShelterIds(JSON.parse(localStorage.getItem("favoriteShelters") || "[]"));

@@ -13,6 +13,7 @@ import Header from './components/layout/Header';
 import BoardWrite from "./pages/Board/BoardWrite";
 import BoardEdit from './pages/Board/BoardEdit';
 import FindAccount from './pages/FindAccount';
+import ReportAdmin from "./pages/Report/ReportAdmin";
 import { FavoriteProvider } from './context/FavoriteContext';
 import './App.css';
 
@@ -49,6 +50,7 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/findaccount" element={<FindAccount />} />
             <Route path="/mypage" element={<MyPage />} />
+            <Route path="/report/admin" element={<ReportAdmin />} />
             <Route path="/report" element={<ReportPage />} />
             <Route path="/board" element={<BoardMain />} />
             <Route path="/board/:id" element={<BoardDetail />} />

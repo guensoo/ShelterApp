@@ -4,13 +4,19 @@ import { createBrowserHistory } from "history";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { ShelterFilterProvider } from "./context/ShelterFilterContext";
+import { AlertProvider } from "./context/AlertContext";
+import { AuthProvider } from "./context/AuthContext";
 
 const history = createBrowserHistory();
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <ShelterFilterProvider>
-    <HistoryRouter history={history}>
-      <App />
-    </HistoryRouter>
+      <AuthProvider>
+        <AlertProvider>
+          <HistoryRouter history={history}>
+            <App />
+          </HistoryRouter>
+        </AlertProvider>
+      </AuthProvider>
   </ShelterFilterProvider>
 );

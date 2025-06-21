@@ -7,6 +7,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useState, useEffect } from 'react';
+import { useAlert  } from '../../context/AlertContext';
 
 const BoardDetail = () => {
   const { id } = useParams();
@@ -21,6 +22,9 @@ const BoardDetail = () => {
   const [scrapped, setScrapped] = useState(false);
   // 👤 로그인 유저 (localStorage에서 가져옴)
   const [loginUser, setLoginUser] = useState(null);
+
+  // swal2 컴포넌트
+  const { showAlert, showToast } = useAlert();
 
   // util
   const getLoginUser = () => {
@@ -42,46 +46,49 @@ const setLikedPosts = (userId, arr) =>
   }, [postId]);
 
   // 추천(좋아요) 클릭
-  const handleLike = () => {
+  const handleLike = async () => {
     if (!loginUser) {
-      alert("로그인이 필요합니다");
+      await showAlert({ title: "로그인이 필요합니다", icon: "warning" });
       return;
     }
     const likedPosts = getLikedPosts(loginUser.userNickName);
     if (likedPosts.includes(postId)) {
-      alert("이미 추천하셨습니다.");
+      await showAlert({ title: "이미 추천하셨습니다.", icon: "info" });
       return;
     }
     setLike((prev) => prev + 1);
     likedPosts.push(postId);
     setLikedPosts(loginUser.userNickName, likedPosts);
+    await showToast({ title: "추천 완료!", icon: "success" });
     // (서버 연동시 PATCH 요청)
   };
 
   // 스크랩 클릭
-  const handleScrap = () => {
+  const handleScrap = async () => {
     if (!loginUser) {
-      alert("로그인이 필요합니다");
+      await showAlert({ title: "로그인이 필요합니다", icon: "warning" });
       return;
     }
     let scrapList = getScrapList();
     if (scrapped) {
       scrapList = scrapList.filter((pid) => pid !== postId);
       setScrapped(false);
+      await showToast({ title: "스크랩이 취소되었습니다", icon: "info" });
     } else {
       scrapList.push(postId);
       setScrapped(true);
+      await showToast({ title: "스크랩 되었습니다!", icon: "success" });
     }
     localStorage.setItem("scrapPosts", JSON.stringify(scrapList));
   };
 
   // 신고 클릭 (목업)
-  const handleReport = () => {
+  const handleReport = async () => {
     if (!loginUser) {
-      alert("로그인이 필요합니다");
+      await showAlert({ title: "로그인이 필요합니다", icon: "warning" });
       return;
     }
-    alert("🚨 신고가 접수되었습니다. (실제 신고 기능은 추후 구현)");
+    await showAlert({ title: "🚨 신고가 접수되었습니다.", icon: "success" });
   };
 
   if (!post) {
@@ -95,13 +102,31 @@ const setLikedPosts = (userId, arr) =>
     );
   }
 
-  const handleDelete = () => {
-    if (window.confirm("정말 삭제하시겠습니까?")) {
-      alert("🗑️ 삭제 완료 (목업이므로 실제 삭제는 구현 필요)");
+  const handleDelete = async () => {
+    const result = await showAlert({
+      title: "정말 삭제하시겠습니까?",
+      text: "삭제한 글은 복구할 수 없습니다.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "네, 삭제합니다",
+      cancelButtonText: "아니오"
+    });
+    if (result.isConfirmed) {
+      await showToast({ title: "🗑️ 삭제 완료!", icon: "success" });
       navigate("/board");
     }
   };
 
+  if (!post) {
+    return (
+      <Box sx={{ mt: 5, textAlign: "center" }}>
+        <Typography variant="h6">❌ 존재하지 않는 게시글입니다.</Typography>
+        <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate("/board")}>
+          목록으로
+        </Button>
+      </Box>
+    );
+  }
   return (
     <Box sx={{ maxWidth: 800, mx: "auto", mt: 5 }}>
       <Paper sx={{ p: 3 }}>
