@@ -3,21 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Card, CardContent, TextField, Button, Typography } from "@mui/material";
 import { useAlert } from "../context/AlertContext";
 import { useAuth } from "../context/AuthContext";
-
-const DUMMY_USER = [
-  {
-    userId: "asdf1234",
-    userNickName: "나예요",
-    password: "asdf1234!",
-    point: 1000
-  },
-  {
-    userId: "admin",
-    userNickName: "관리자",
-    password: "admin1234!",
-    point: 9999
-  }
-];
+import { loginUser, fetchMe } from "../api/user"; // 🔥 백엔드 연동
 
 const LoginPage = ({ setIsLoggedIn }) => {
   const [userId, setUserId] = useState("");
@@ -35,27 +21,24 @@ const LoginPage = ({ setIsLoggedIn }) => {
       return;
     }
 
-    const matchedUser = DUMMY_USER.find(
-      (user) => user.userId === userId && user.password === pw
-    );
+    try {
+      const res = await loginUser(userId, pw);
+      localStorage.setItem("token", res.token); // ✅ 토큰만 저장
 
-    if (!matchedUser) {
-      setErrorMsg("아이디 또는 비밀번호가 다릅니다.");
-      return;
+      const user = await fetchMe(); // ✅ 토큰으로 유저 정보 조회
+      login(user); // ✅ Context에 저장 (로컬 X)
+      setIsLoggedIn(true);
+      setErrorMsg("");
+
+      await showAlert({
+        title: user.username.toLowerCase() === "admin" ? "관리자로 로그인되었습니다." : "로그인 성공!",
+        icon: "success",
+      });
+
+      navigate("/");
+    } catch (err) {
+      setErrorMsg(err.message || "로그인 실패");
     }
-
-    login(matchedUser);
-    setIsLoggedIn(true);
-    setErrorMsg("");
-
-    await showAlert({
-      title: matchedUser.userId.toLowerCase() === "admin"
-        ? "관리자로 로그인되었습니다."
-        : "로그인 성공!",
-      icon: "success",
-    });
-
-    navigate("/");
   };
 
   return (
@@ -85,47 +68,16 @@ const LoginPage = ({ setIsLoggedIn }) => {
               error={!!errorMsg}
               helperText={errorMsg || ""}
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 2, fontWeight: 600, borderRadius: 2 }}
-            >
+            <Button type="submit" fullWidth variant="contained" sx={{ mt: 2, fontWeight: 600, borderRadius: 2 }}>
               로그인
             </Button>
           </form>
-          <Button
-            fullWidth
-            variant="text"
-            onClick={() => navigate("/findaccount")}
-            sx={{
-              mt: 1,
-              color: "#4caf50",
-              fontWeight: 600,
-              "&:hover": {
-                backgroundColor: "transparent",
-                textDecoration: "underline",
-                color: "#388e3c",
-              },
-            }}
-          >
+          <Button fullWidth variant="text" onClick={() => navigate("/findaccount")}
+            sx={{ mt: 1, color: "#4caf50", fontWeight: 600, "&:hover": { textDecoration: "underline" } }}>
             아이디 혹은 비밀번호를 잊으셨나요?
           </Button>
-          <Button
-            fullWidth
-            variant="text"
-            onClick={() => navigate("/signup")}
-            sx={{
-              mt: 1,
-              color: "#1976d2",
-              fontWeight: 600,
-              "&:hover": {
-                backgroundColor: "transparent",
-                textDecoration: "underline",
-                color: "#115293",
-              },
-            }}
-          >
+          <Button fullWidth variant="text" onClick={() => navigate("/signup")}
+            sx={{ mt: 1, color: "#1976d2", fontWeight: 600, "&:hover": { textDecoration: "underline" } }}>
             아직 회원이 아니신가요? 회원가입
           </Button>
         </CardContent>

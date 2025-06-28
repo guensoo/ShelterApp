@@ -6,7 +6,7 @@ const FILTER_OPTIONS = [
   { value: "ALL", label: "전체" },
   { value: "HEAT", label: "무더위쉼터" },
   { value: "COLD", label: "한파쉼터" },
-  { value: "EARTHQUAKE_TSUNAMI", label: "지진/해일 대피소" },
+  { value: "EARTHQUAKE", label: "지진/해일 대피소" },
   { value: "CHEMICAL", label: "화학 대피소" },
   { value: "CIVIL_DEFENSE", label: "민방위 대피소" },
 ];

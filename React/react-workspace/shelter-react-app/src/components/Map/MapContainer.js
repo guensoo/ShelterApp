@@ -4,31 +4,32 @@ import markerColors from "./markerColors";
 import MyLocationIcon from '@mui/icons-material/MyLocation';
 import { Button } from '@mui/material';
 import { useNavigate } from "react-router-dom";
+import ShelterDetail from "./ShelterDetail"; // 상세 Drawer
 
 const DEFAULT_CENTER = { lat: 37.5665, lng: 126.9780 };
 const NAVER_MAP_SCRIPT_ID = "naver-map-script";
 
-const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
+const MapContainer = ({ shelters = [], keyword }) => {
   const mapRef = useRef(null);
   const mapInstance = useRef(null);
   const [markers, setMarkers] = useState([]);
   const infoWindowRef = useRef(null);
-  const [isMapReady, setIsMapReady] = useState(false); // ⭐️ 추가
+  const [isMapReady, setIsMapReady] = useState(false);
+
+  // ⭐ 상세보기 Drawer/Modal 상태
+  const [selectedShelter, setSelectedShelter] = useState(null);
 
   // 네이버맵 스크립트 동적 추가 및 로딩 감지
   useEffect(() => {
-    // 이미 스크립트가 있다면 로딩 체크 후 바로 세팅
     if (window.naver && window.naver.maps) {
       setIsMapReady(true);
       return;
     }
-    // 이미 추가된 script 태그 있으면 이벤트만 걸어줌
     const existScript = document.getElementById(NAVER_MAP_SCRIPT_ID);
     if (existScript) {
       existScript.addEventListener("load", () => setIsMapReady(true));
       return;
     }
-    // 새로 추가
     const script = document.createElement("script");
     script.id = NAVER_MAP_SCRIPT_ID;
     script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.REACT_APP_NAVER_MAP_API_KEY}`;
@@ -37,14 +38,10 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
     document.head.appendChild(script);
 
     return () => {
-      // 필요시 클린업, script 제거는 안함(다른 컴포넌트에서 또 쓸 수 있으니까)
       script.removeEventListener("load", () => setIsMapReady(true));
     };
   }, []);
 
-  const [favorites, setFavorites] = useState(() => {
-    return JSON.parse(localStorage.getItem("favorites") || "[]");
-  });
   const navigate = useNavigate();
 
   const getInfoWindowContent = (shelter) => `
@@ -97,48 +94,13 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
           },
         });
 
-        const infoWindow = new naver.maps.InfoWindow({
-          content: `
-            <div style="
-              padding: 8px 12px;
-              font-size: 14px;
-              background: white;
-              border-radius: 6px;
-            ">
-              📍 내 위치
-            </div>
-          `,
-          pixelOffset: new naver.maps.Point(0, -10),
-        });
-        infoWindowRef.current = infoWindow;
-
-        naver.maps.Event.addListener(marker, "click", () => {
-          infoWindow.open(mapInstance.current, marker);
-        });
-
         mapInstance.current.setCenter(myLocation);
       },
       (err) => console.error("위치 허용 실패:", err)
     );
   };
 
-  const toggleFavorite = (shelter) => {
-    const isLoggedIn = !!localStorage.getItem("user");
-    if (!isLoggedIn) {
-      const confirmLogin = window.confirm("이 기능은 로그인 후 이용 가능합니다.\n로그인하시겠습니까?");
-      if (confirmLogin) navigate("/login");
-      return;
-    }
-
-    const exists = favorites.some(f => f.id === shelter.id);
-    const updated = exists
-      ? favorites.filter(f => f.id !== shelter.id)
-      : [...favorites, shelter];
-
-    setFavorites(updated);
-    localStorage.setItem("favorites", JSON.stringify(updated));
-  };
-
+  // 🟡 마커 클릭시 상세 오픈
   const createMarker = (shelter) => {
     const marker = new naver.maps.Marker({
       position: new naver.maps.LatLng(shelter.lat, shelter.lng),
@@ -181,7 +143,7 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
 
         const detailBtn = document.getElementById("open-detail-btn");
         if (detailBtn) detailBtn.onclick = () => {
-          onSelectShelter?.(shelter);
+          setSelectedShelter(shelter); // 💥 상세 오픈
           infoWindowRef.current.close();
         };
       }, 100);
@@ -198,7 +160,6 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
     setMarkers(newMarkers);
   };
 
-  // 네이버맵이 완전히 로딩된 뒤에만 맵 초기화!
   useEffect(() => {
     if (!isMapReady) return;
     if (!naver || !naver.maps || !mapRef.current) return;
@@ -219,25 +180,7 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
       (pos) => initializeMap(pos.coords.latitude, pos.coords.longitude),
       () => initializeMap(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng)
     );
-    // eslint-disable-next-line
   }, [isMapReady]); // ⭐️ isMapReady를 의존성에 추가
-
-  useEffect(() => {
-    if (!isMapReady) return;
-    if (!naver || !naver.maps || !mapInstance.current || !keyword) return;
-
-    const geocoder = new naver.maps.services.Geocoder();
-    geocoder.addressSearch(keyword, (result, status) => {
-      if (status === naver.maps.services.Status.OK && result.length > 0) {
-        const { y, x } = result[0];
-        const latlng = new naver.maps.LatLng(y, x);
-        mapInstance.current.setCenter(latlng);
-        mapInstance.current.setZoom(16);
-      } else {
-        console.warn("❌ 지오코딩 실패:", status, result);
-      }
-    });
-  }, [isMapReady, keyword]);
 
   useEffect(() => {
     if (!isMapReady) return;
@@ -247,7 +190,6 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
       .filter(shelter => shelter.lat && shelter.lng)
       .map(createMarker);
     setMarkers(newMarkers);
-    // eslint-disable-next-line
   }, [isMapReady, shelters]);
 
   const handleMoveToMyLocation = () => {
@@ -294,6 +236,14 @@ const MapContainer = ({ shelters = [], onSelectShelter, keyword }) => {
       >
         <MyLocationIcon />
       </Button>
+
+      {/* 상세 Drawer/Modal (선택된 쉼터 있을 때만) */}
+      {selectedShelter && (
+        <ShelterDetail
+          shelter={selectedShelter}
+          onClose={() => setSelectedShelter(null)}
+        />
+      )}
     </div>
   );
 };

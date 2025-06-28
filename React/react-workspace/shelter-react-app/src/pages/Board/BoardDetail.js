@@ -175,17 +175,37 @@ const setLikedPosts = (userId, arr) =>
 
         {/* 우측 정렬: 목록/수정/삭제 */}
         <Box
-          sx={{
-            mt: 3,
-            display: "flex",
-            justifyContent: "flex-end",
-            gap: 1,
-          }}
-        >
-          <Button variant="outlined" onClick={() => navigate("/board")}>목록</Button>
-          <Button variant="contained" onClick={() => navigate(`/board/edit/${postId}`)}>수정</Button>
-          <Button variant="contained" color="error" onClick={handleDelete}>삭제</Button>
-        </Box>
+			sx={{
+				mt: 3,
+				display: "flex",
+				justifyContent: "flex-end",
+				gap: 1,
+			}}
+			>
+			<Button variant="outlined" onClick={() => navigate("/board")}>목록</Button>
+
+			{(loginUser && (
+				loginUser.userNickName === post.author ||
+				loginUser.userId === 'admin' || // AuthContext 구조에 따라 다르게 세팅
+				loginUser.role === 'ADMIN'
+			)) && (
+				<>
+				<Button
+					variant="contained"
+					onClick={() => navigate(`/board/edit/${postId}`)}
+				>
+					수정
+				</Button>
+				<Button
+					variant="contained"
+					color="error"
+					onClick={handleDelete}
+				>
+					삭제
+				</Button>
+				</>
+			)}
+		</Box>
       </Paper>
 
       {/* 💬 댓글 영역 */}

@@ -21,7 +21,7 @@ export const fetchChemicalShelters = async () => {
 // 민방위대피소
 export const fetchCivilDefenseShelters = async () => {
   const res = await API.get('/shelters/defense');
-  return res.data.map(d => ({ ...d, type: 'CIVIL' }));
+  return res.data.map(d => ({ ...d, type: 'CIVIL_DEFENSE' }));
 };
 
 // 지진/해일대피소

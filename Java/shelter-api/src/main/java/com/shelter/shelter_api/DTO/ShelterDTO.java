@@ -29,6 +29,15 @@ public class ShelterDTO {
     private Integer capacity;   // 수용인원 (없으면 null)
     private String remark;      // 비고/추가정보 (옵션)
 
+    private static Double safeParseDouble(String value) {
+        if (value == null || value.trim().isEmpty() || value.equalsIgnoreCase("null")) return null;
+        try { return Double.parseDouble(value); } catch (Exception e) { return null; }
+    }
+    private static Integer safeParseInt(String value) {
+        if (value == null || value.trim().isEmpty() || value.equalsIgnoreCase("null")) return null;
+        try { return Integer.parseInt(value); } catch (Exception e) { return null; }
+    }
+
     // DefenseShelter(민방위)
     public static ShelterDTO fromCivil(DefenseShelterEntity e) {
         return ShelterDTO.builder()
@@ -47,16 +56,16 @@ public class ShelterDTO {
     // HeatShelter(무더위)
     public static ShelterDTO fromHeat(HeatShelterEntity e) {
         return ShelterDTO.builder()
-            .id(e.getId())
-            .name(e.getRstrNm())
-            .address(e.getRnDtlAdres() != null ? e.getRnDtlAdres() : e.getDtlAdres())
-            .lat(e.getLa() != null ? Double.parseDouble(e.getLa()) : null)
-            .lng(e.getLo() != null ? Double.parseDouble(e.getLo()) : null)
-            .type(ShelterType.HEAT)
-            .phone(null) // 필요하면 엔티티에 관리부서 전화 필드 추가
-            .capacity(e.getUsePsblNmpr() != null ? Integer.parseInt(e.getUsePsblNmpr()) : null)
-            .remark(e.getRm())
-            .build();
+                .id(e.getId())
+                .name(e.getRstrNm())
+                .address(e.getRnDtlAdres() != null ? e.getRnDtlAdres() : e.getDtlAdres())
+                .lat(safeParseDouble(e.getLa()))
+                .lng(safeParseDouble(e.getLo()))
+                .type(ShelterType.HEAT)
+                .phone(null)
+                .capacity(safeParseInt(e.getUsePsblNmpr()))
+                .remark(e.getRm())
+                .build();
     }
 
     // ColdShelter(한파)
