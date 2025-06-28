@@ -4,19 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shelter.shelter_api.Entity.ColdShelterEntity;
 import com.shelter.shelter_api.Repository.ColdShelterRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class ColdShelterLoader {
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         try {
             loadColdShelters();

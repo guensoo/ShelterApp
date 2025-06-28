@@ -4,19 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shelter.shelter_api.Entity.DefenseShelterEntity;
 import com.shelter.shelter_api.Repository.DefenseShelterRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
 @RequiredArgsConstructor
 public class DefenseShelterLoader {
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         try {
             loadDefenseShelters();

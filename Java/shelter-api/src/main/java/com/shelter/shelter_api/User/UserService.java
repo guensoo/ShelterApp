@@ -1,13 +1,11 @@
-package com.shelter.shelter_api.Service;
+package com.shelter.shelter_api.User;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.shelter.shelter_api.DTO.LoginRequest;
 import com.shelter.shelter_api.DTO.SignupRequest;
-import com.shelter.shelter_api.Entity.UserEntity;
 import com.shelter.shelter_api.Enum.Role;
-import com.shelter.shelter_api.Repository.UserRepository;
 import com.shelter.shelter_api.Security.JwtProvider;
 
 import lombok.RequiredArgsConstructor;

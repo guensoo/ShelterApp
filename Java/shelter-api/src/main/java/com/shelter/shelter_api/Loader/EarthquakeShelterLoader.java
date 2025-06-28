@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shelter.shelter_api.Entity.EarthquakeShelterEntity;
 import com.shelter.shelter_api.Repository.EarthquakeShelterRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -16,7 +15,7 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class EarthquakeShelterLoader {
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         try {
             loadEarthquakeShelters();

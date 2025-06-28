@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.shelter.shelter_api.Entity.HeatShelterEntity;
 import com.shelter.shelter_api.Repository.HeatShelterRepository;
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -12,12 +11,11 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class HeatShelterLoader {
-    @PostConstruct
+//    @PostConstruct
     public void init() {
         try {
             loadHeatShelters();
@@ -56,8 +54,8 @@ public class HeatShelterLoader {
                 for (JsonNode item : body) {
                     String rstrFcltyNo = item.path("RSTR_FCLTY_NO").asText();
 
-                    Optional<HeatShelterEntity> existing = repository.findByRstrFcltyNo(rstrFcltyNo);
-                    HeatShelterEntity entity = existing.orElse(new HeatShelterEntity());
+                    List<HeatShelterEntity> existingList = repository.findByRstrFcltyNo(rstrFcltyNo);
+                    HeatShelterEntity entity = existingList.isEmpty() ? new HeatShelterEntity() : existingList.get(0);
 
                     entity.setRstrFcltyNo(rstrFcltyNo);
                     entity.setYear(item.path("YEAR").asText());

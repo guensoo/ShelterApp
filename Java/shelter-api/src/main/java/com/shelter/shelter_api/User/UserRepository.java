@@ -1,11 +1,9 @@
-package com.shelter.shelter_api.Repository;
-
-import java.util.Optional;
+package com.shelter.shelter_api.User;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.shelter.shelter_api.Entity.UserEntity;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends JpaRepository<UserEntity, Long> {

@@ -1,15 +1,7 @@
 package com.shelter.shelter_api.Entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "heat_shelter")
@@ -23,6 +15,7 @@ public class HeatShelterEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String rstrFcltyNo;          // 쉼터시설번호
     private String year;                 // 년도
     private String arcd;                 // 지역코드
@@ -37,6 +30,7 @@ public class HeatShelterEntity {
     private String inptTime;             // 입력시간
     private String modfTime;             // 수정시간
     private String useAt;                // 사용여부
+    @Column(length = 1000) // 혹은 더 여유있게
     private String rm;                   // 비고
     private String rnDtlAdres;           // 도로명상세주소
     private String chckMatterWkendHdayOpnAt; // 점검사항주말휴일개방여부

@@ -1,4 +1,4 @@
-package com.shelter.shelter_api.Entity;
+package com.shelter.shelter_api.User;
 
 import com.shelter.shelter_api.Enum.Role;
 
