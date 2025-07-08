@@ -1,14 +1,9 @@
 import SunEditor from "suneditor-react";
 import "suneditor/dist/css/suneditor.min.css";
 import {
-  Box,
-  TextField,
-  Typography,
-  Button,
-  FormControlLabel,
-  Switch,
+  Box, TextField, Typography, Button, FormControlLabel, Switch,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ImageDrop from "./ImageDrop";
 import { useAlert } from "../../context/AlertContext";
@@ -18,28 +13,43 @@ import { createBoard } from '../../api/board';
 const BoardWrite = () => {
   const navigate = useNavigate();
   const { showAlert } = useAlert();
-  const { isAdmin } = useAuth(); // 실제 권한 체크
+  const { isAdmin } = useAuth();
+
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState([]);
-
   const [isPrivate, setIsPrivate] = useState(false);
   const [password, setPassword] = useState("");
   const [isNotice, setIsNotice] = useState(false);
 
-    const handleSubmit = async () => {
-    const cleanContent = content.replace(/<(.|\n)*?>/g, "").trim();
+  // SunEditor ref로 강제 동기화 지원
+  const editorRef = useRef(null);
+
+  // 텍스트만 추출하는 함수 (정규식보단 DOMParser가 더 신뢰도 높음)
+  const extractText = html => {
+    const doc = new window.DOMParser().parseFromString(html, 'text/html');
+    return doc.body.textContent || "";
+  };
+
+  // 등록 버튼 누를 때 강제로 최신값 반영
+  const handleSubmit = async () => {
+    let latestContent = content;
+
+    // SunEditor ref가 있다면, 최신값 강제로 가져옴
+    if (editorRef.current) {
+      latestContent = editorRef.current.getContents();
+    }
+
+    const cleanContent = extractText(latestContent).trim();
 
     if (!title.trim()) {
       await showAlert({ title: "제목을 입력해주세요.", icon: "warning" });
       return;
     }
-
     if (!cleanContent) {
       await showAlert({ title: "내용을 입력해주세요.", icon: "warning" });
       return;
     }
-
     if (isPrivate && !/^\d{4}$/.test(password)) {
       await showAlert({ title: "비밀글 비밀번호는 숫자 4자리여야 합니다.", icon: "warning" });
       return;
@@ -47,7 +57,7 @@ const BoardWrite = () => {
 
     const postData = {
       title,
-      content,
+      content: latestContent, // 실제 HTML 내용 저장
       isPrivate,
       password: isPrivate ? password : null,
       isNotice: isAdmin ? isNotice : false,
@@ -67,9 +77,7 @@ const BoardWrite = () => {
       <Typography variant="h4" gutterBottom>
         ✏️ 게시글 작성
       </Typography>
-      
 
-      {/* ✅ 관리자만 공지글 스위치 표시 */}
       {isAdmin && (
         <FormControlLabel
           control={
@@ -92,18 +100,17 @@ const BoardWrite = () => {
       />
 
       <SunEditor
-        setContents={content}
+        getSunEditorInstance={ref => editorRef.current = ref}
+        defaultValue={content}
         onChange={setContent}
         height="300px"
         setOptions={{
-          buttonList: [
-            ["bold", "italic", "underline", "list", "align", "fontSize"],
-          ],
+          buttonList: [["bold", "italic", "underline", "list", "align", "fontSize"]],
         }}
       />
 
       <ImageDrop onFilesSelected={setUploadedFiles} />
-            {/* ✅ 비밀글 스위치 */}
+
       <FormControlLabel
         control={
           <Switch
@@ -115,15 +122,12 @@ const BoardWrite = () => {
         sx={{ mb: 2 }}
       />
 
-      {/* ✅ 비밀번호 입력란 */}
       {isPrivate && (
         <TextField
           fullWidth
           label="비밀번호 (숫자 4자리)"
           value={password}
-          onChange={(e) =>
-            setPassword(e.target.value.replace(/\D/g, "").slice(0, 4))
-          }
+          onChange={(e) => setPassword(e.target.value.replace(/\D/g, "").slice(0, 4))}
           inputProps={{ maxLength: 4 }}
           sx={{ mb: 2 }}
         />

@@ -5,7 +5,7 @@ import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useState, useEffect } from 'react';
-import { useAlert  } from '../../context/AlertContext';
+import { useAlert } from '../../context/AlertContext';
 import { fetchBoardDetail } from '../../api/board'; // API 함수 import
 
 const BoardDetail = () => {
@@ -150,10 +150,37 @@ const BoardDetail = () => {
   return (
     <Box sx={{ maxWidth: 800, mx: "auto", mt: 5 }}>
       <Paper sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>{post.title}</Typography>
-        <Typography variant="body2" color="textSecondary">
-          작성자: {post.author} | {post.createdAt}
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 0.5,
+            px: 1,
+            fontWeight: 700,
+            fontSize: 22
+          }}
+        >
+          <span>{post.title}</span>
+          <span style={{ fontWeight: 400, fontSize: 15, color: "#888" }}>
+            {post.createdAt?.slice(0, 10)}
+          </span>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 3,
+            mb: 2,
+            px: 1,
+            fontSize: 15,
+            color: "#444"
+          }}
+        >
+          <span>작성자: <b>{post.username}</b></span>
+          <span>| 추천: <b>{like}</b></span>
+          <span>| 조회수: <b>{post.viewCount ?? 0}</b></span>
+        </Box>
 
         <Box sx={{ mt: 2 }} dangerouslySetInnerHTML={{ __html: post.content }} />
 
@@ -206,26 +233,26 @@ const BoardDetail = () => {
           </Button>
 
           {(loginUser && (
-            loginUser.userNickName === post.author ||
+            loginUser.username === post.username ||
             loginUser.userId === 'admin' || // AuthContext 구조에 따라 다르게 세팅
             loginUser.role === 'ADMIN'
           )) && (
-            <>
-              <Button
-                variant="contained"
-                onClick={() => navigate(`/board/edit/${postId}`)}
-              >
-                수정
-              </Button>
-              <Button
-                variant="contained"
-                color="error"
-                onClick={handleDelete}
-              >
-                삭제
-              </Button>
-            </>
-          )}
+              <>
+                <Button
+                  variant="contained"
+                  onClick={() => navigate(`/board/edit/${postId}`)}
+                >
+                  수정
+                </Button>
+                <Button
+                  variant="contained"
+                  color="error"
+                  onClick={handleDelete}
+                >
+                  삭제
+                </Button>
+              </>
+            )}
         </Box>
       </Paper>
 
@@ -238,7 +265,7 @@ const BoardDetail = () => {
         ) : (
           comments.map((c) => (
             <Box key={c.id} sx={{ mb: 2, p: 1.5, border: "1px solid #eee", borderRadius: 1 }}>
-              <Typography variant="subtitle2">{c.author} · {c.createdAt}</Typography>
+              <Typography variant="subtitle2">{c.username} · {c.createdAt}</Typography>
               <Typography variant="body1">{c.content}</Typography>
             </Box>
           ))
