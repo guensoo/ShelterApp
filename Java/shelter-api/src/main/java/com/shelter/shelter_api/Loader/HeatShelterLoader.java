@@ -1,21 +1,24 @@
 package com.shelter.shelter_api.Loader;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.shelter.shelter_api.Entity.HeatShelterEntity;
-import com.shelter.shelter_api.Repository.HeatShelterRepository;
-import lombok.RequiredArgsConstructor;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.shelter.shelter_api.Entity.HeatShelterEntity;
+import com.shelter.shelter_api.Repository.HeatShelterRepository;
+
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
 public class HeatShelterLoader {
-//    @PostConstruct
+    @PostConstruct
     public void init() {
         try {
             loadHeatShelters();
