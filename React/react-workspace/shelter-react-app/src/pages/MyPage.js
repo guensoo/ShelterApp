@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Typography, List, ListItem, ListItemText, Divider, Paper } from "@mui/material";
 import { useFavorite } from "../context/FavoriteContext";
 import { useAlert } from "../context/AlertContext";
+import { useAuth } from "../context/AuthContext"; // 👈 추가
 import mockPosts from "../data/mockPosts";
 import DUMMY_HEAT_SHELTERS from "../data/DUMMY_HEAT_SHELTERS";
 import DUMMY_COLD_SHELTERS from "../data/DUMMY_COLD_SHELTERS";
@@ -20,17 +21,16 @@ const allShelters = [
 
 const MyPage = () => {
   const navigate = useNavigate();
-  const loginUser = JSON.parse(localStorage.getItem("loginUser"));
+  const { loginUser, isLoggedIn, isLoading } = useAuth(); // 👈 context 사용
   const { favorites } = useFavorite();
   const [favoriteShelterIds, setFavoriteShelterIds] = useState([]);
-  
   const { showAlert } = useAlert();
-
-  // [스크랩한 게시글 id 배열]
   const [scrapPostIds, setScrapPostIds] = useState([]);
 
+  // 🚩 1. 비동기 로그인 체크 (완전 안전)
   useEffect(() => {
-    if (!loginUser) {
+    if (isLoading) return; // 아직 초기화 중이면 아무것도 안함
+    if (!isLoggedIn || !loginUser) {
       showAlert({
         title: "로그인이 필요합니다.",
         text: "로그인 후 이용해주세요.",
@@ -38,16 +38,19 @@ const MyPage = () => {
       }).then(() => {
         navigate("/login");
       });
-      return;
     }
-    setScrapPostIds(JSON.parse(localStorage.getItem("scrapPosts") || "[]"));
-  }, [loginUser, navigate, showAlert]);
+  }, [isLoading, isLoggedIn, loginUser, navigate, showAlert]);
 
+  // 🚩 2. 즐겨찾기, 스크랩 데이터는 로그인/마이페이지 진입 시에만 동기화
   useEffect(() => {
-    setFavoriteShelterIds(JSON.parse(localStorage.getItem("favoriteShelters") || "[]"));
-  }, []);
+    if (isLoggedIn && loginUser) {
+      setFavoriteShelterIds(JSON.parse(localStorage.getItem("favoriteShelters") || "[]"));
+      setScrapPostIds(JSON.parse(localStorage.getItem("scrapPosts") || "[]"));
+    }
+  }, [isLoggedIn, loginUser]);
 
-  if (!loginUser) return null;
+  // 🚩 3. 로그인 미완료/비동기중엔 무조건 아무것도 렌더X
+  if (isLoading || !isLoggedIn || !loginUser) return null;
 
   return (
     <Box
@@ -71,10 +74,10 @@ const MyPage = () => {
         }}
       >
         <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-          반갑습니다 {loginUser.userNickName} 님
+          반갑습니다 {loginUser.nickname || loginUser.username || "회원"} 님
         </Typography>
         <Typography variant="h6" sx={{ color: "gray" }}>
-          보유 포인트 : {loginUser.point}P
+          보유 포인트 : {loginUser.point ?? 0}P
         </Typography>
       </Box>
 
@@ -133,7 +136,7 @@ const MyPage = () => {
               const post = mockPosts.find((p) => p.id === postId);
               if (!post) return null;
               return (
-                 <Box key={post.id}>
+                <Box key={post.id}>
                   <ListItem sx={{ cursor: "default" }}>
                     <ListItemText
                       primary={

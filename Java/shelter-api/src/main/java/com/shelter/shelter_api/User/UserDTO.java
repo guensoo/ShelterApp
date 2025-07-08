@@ -1,6 +1,5 @@
 package com.shelter.shelter_api.User;
 
-import com.shelter.shelter_api.Enum.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

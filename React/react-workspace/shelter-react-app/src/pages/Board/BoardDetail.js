@@ -1,23 +1,25 @@
 import { Box, Typography, Paper, Button, Divider, IconButton, Tooltip } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
-import mockPosts from "../../data/mockPosts";
-import mockComments from "../../data/mockComments";
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import { useState, useEffect } from 'react';
 import { useAlert  } from '../../context/AlertContext';
+import { fetchBoardDetail } from '../../api/board'; // API 함수 import
 
 const BoardDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const postId = parseInt(id);
-  const post = mockPosts.find((p) => p.id === postId);
-  const comments = mockComments[postId] || [];
+
+  const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]); // 댓글도 API 연동 필요하면 여기에 set
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // 👍 추천(좋아요) state
-  const [like, setLike] = useState(post?.like ?? 0);
+  const [like, setLike] = useState(0);
   // ⭐ 스크랩 state
   const [scrapped, setScrapped] = useState(false);
   // 👤 로그인 유저 (localStorage에서 가져옴)
@@ -34,16 +36,52 @@ const BoardDetail = () => {
   const getScrapList = () => JSON.parse(localStorage.getItem("scrapPosts") || "[]");
 
   const getLikedPosts = (userId) =>
-  JSON.parse(localStorage.getItem(`likedPosts_${userId}`) || "[]");
-const setLikedPosts = (userId, arr) =>
-  localStorage.setItem(`likedPosts_${userId}`, JSON.stringify(arr));
+    JSON.parse(localStorage.getItem(`likedPosts_${userId}`) || "[]");
+  const setLikedPosts = (userId, arr) =>
+    localStorage.setItem(`likedPosts_${userId}`, JSON.stringify(arr));
 
-  // 마운트 시 로그인/스크랩 상태 체크
+  // 마운트 시 로그인/스크랩 상태 체크 및 게시글 데이터 호출
   useEffect(() => {
     setLoginUser(getLoginUser());
+
     const scrapList = getScrapList();
     setScrapped(scrapList.includes(postId));
+
+    setLoading(true);
+    fetchBoardDetail(postId)
+      .then((data) => {
+        setPost(data);
+        setLike(data.likeCount ?? 0);
+        // TODO: 댓글 API 호출 후 setComments(data.comments)
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message || "게시글을 불러오는 데 실패했습니다.");
+        setLoading(false);
+      });
   }, [postId]);
+
+  if (loading) return <Typography>로딩중...</Typography>;
+  if (error)
+    return (
+      <Box sx={{ mt: 5, textAlign: "center" }}>
+        <Typography variant="h6">❌ {error}</Typography>
+        <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate("/board")}>
+          목록으로
+        </Button>
+      </Box>
+    );
+
+  if (!post) {
+    return (
+      <Box sx={{ mt: 5, textAlign: "center" }}>
+        <Typography variant="h6">❌ 존재하지 않는 게시글입니다.</Typography>
+        <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate("/board")}>
+          목록으로
+        </Button>
+      </Box>
+    );
+  }
 
   // 추천(좋아요) 클릭
   const handleLike = async () => {
@@ -60,7 +98,7 @@ const setLikedPosts = (userId, arr) =>
     likedPosts.push(postId);
     setLikedPosts(loginUser.userNickName, likedPosts);
     await showToast({ title: "추천 완료!", icon: "success" });
-    // (서버 연동시 PATCH 요청)
+    // TODO: 서버에 추천 PATCH 요청 연동 필요
   };
 
   // 스크랩 클릭
@@ -80,6 +118,7 @@ const setLikedPosts = (userId, arr) =>
       await showToast({ title: "스크랩 되었습니다!", icon: "success" });
     }
     localStorage.setItem("scrapPosts", JSON.stringify(scrapList));
+    // TODO: 서버에 스크랩 상태 PATCH 요청 연동 필요
   };
 
   // 신고 클릭 (목업)
@@ -89,18 +128,8 @@ const setLikedPosts = (userId, arr) =>
       return;
     }
     await showAlert({ title: "🚨 신고가 접수되었습니다.", icon: "success" });
+    // TODO: 서버에 신고 API 연동 필요
   };
-
-  if (!post) {
-    return (
-      <Box sx={{ mt: 5, textAlign: "center" }}>
-        <Typography variant="h6">❌ 존재하지 않는 게시글입니다.</Typography>
-        <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate("/board")}>
-          목록으로
-        </Button>
-      </Box>
-    );
-  }
 
   const handleDelete = async () => {
     const result = await showAlert({
@@ -114,19 +143,10 @@ const setLikedPosts = (userId, arr) =>
     if (result.isConfirmed) {
       await showToast({ title: "🗑️ 삭제 완료!", icon: "success" });
       navigate("/board");
+      // TODO: 서버에 삭제 API 요청 연동 필요
     }
   };
 
-  if (!post) {
-    return (
-      <Box sx={{ mt: 5, textAlign: "center" }}>
-        <Typography variant="h6">❌ 존재하지 않는 게시글입니다.</Typography>
-        <Button variant="contained" sx={{ mt: 2 }} onClick={() => navigate("/board")}>
-          목록으로
-        </Button>
-      </Box>
-    );
-  }
   return (
     <Box sx={{ maxWidth: 800, mx: "auto", mt: 5 }}>
       <Paper sx={{ p: 3 }}>
@@ -168,44 +188,45 @@ const setLikedPosts = (userId, arr) =>
           <Tooltip title="신고">
             <IconButton onClick={handleReport}>
               <WarningAmberIcon sx={{ color: "#ff9800" }} />
-              {/* 또는 <ReportProblemIcon sx={{ color: "#ff9800" }} /> */}
             </IconButton>
           </Tooltip>
         </Box>
 
         {/* 우측 정렬: 목록/수정/삭제 */}
         <Box
-			sx={{
-				mt: 3,
-				display: "flex",
-				justifyContent: "flex-end",
-				gap: 1,
-			}}
-			>
-			<Button variant="outlined" onClick={() => navigate("/board")}>목록</Button>
+          sx={{
+            mt: 3,
+            display: "flex",
+            justifyContent: "flex-end",
+            gap: 1,
+          }}
+        >
+          <Button variant="outlined" onClick={() => navigate("/board")}>
+            목록
+          </Button>
 
-			{(loginUser && (
-				loginUser.userNickName === post.author ||
-				loginUser.userId === 'admin' || // AuthContext 구조에 따라 다르게 세팅
-				loginUser.role === 'ADMIN'
-			)) && (
-				<>
-				<Button
-					variant="contained"
-					onClick={() => navigate(`/board/edit/${postId}`)}
-				>
-					수정
-				</Button>
-				<Button
-					variant="contained"
-					color="error"
-					onClick={handleDelete}
-				>
-					삭제
-				</Button>
-				</>
-			)}
-		</Box>
+          {(loginUser && (
+            loginUser.userNickName === post.author ||
+            loginUser.userId === 'admin' || // AuthContext 구조에 따라 다르게 세팅
+            loginUser.role === 'ADMIN'
+          )) && (
+            <>
+              <Button
+                variant="contained"
+                onClick={() => navigate(`/board/edit/${postId}`)}
+              >
+                수정
+              </Button>
+              <Button
+                variant="contained"
+                color="error"
+                onClick={handleDelete}
+              >
+                삭제
+              </Button>
+            </>
+          )}
+        </Box>
       </Paper>
 
       {/* 💬 댓글 영역 */}

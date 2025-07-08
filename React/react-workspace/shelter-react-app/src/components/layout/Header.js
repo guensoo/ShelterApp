@@ -14,19 +14,17 @@ import SidebarFilter from "../layout/SidebarFilter";
 import { useAuth } from '../../context/AuthContext';
 import { useAlert } from "../../context/AlertContext";
 
-const Header = ({ isLoggedIn, setIsLoggedIn }) => {
+const Header = () => {
   const navigate = useNavigate();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { isAdmin, isLoggedIn: authLoggedIn, logout } = useAuth();
+  const { isAdmin, isLoggedIn, logout, isLoading } = useAuth();
   const { showAlert } = useAlert();
+
+  if (isLoading) return null;
 
   // 제보합니다 클릭
   const handleReportClick = async () => {
-    console.log("authLoggedIn:", authLoggedIn);
-    console.log("isAdmin:", isAdmin);
-
-    if (!authLoggedIn) {
-      console.log("로그인 필요 알림 호출");
+    if (!isLoggedIn) {
       await showAlert({
         title: '로그인이 필요합니다.',
         text: '제보 기능은 로그인 후 이용 가능합니다.',
@@ -42,9 +40,12 @@ const Header = ({ isLoggedIn, setIsLoggedIn }) => {
     }
   };
 
-  const handleLogout = () => {
-    logout();  // AuthContext 내 로그아웃 처리
-    setIsLoggedIn(false);  // 상위 상태 업데이트 (필요 시)
+  const handleLogout = async () => {
+    await logout(); // 로그아웃 완료될 때까지 기다림
+    await showAlert({
+      title: "로그아웃 되었습니다.",
+      icon: "success",
+    });
     navigate("/");
   };
 

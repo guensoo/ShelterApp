@@ -2,9 +2,9 @@ import { Box, Typography, Button } from "@mui/material";
 import MiniTabBar from "./MiniTabBar";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
-import mockPosts from "../../data/mockPosts"; // ✅ 통일된 mock 데이터 사용
 import { useAlert } from "../../context/AlertContext";
 import { useAuth } from "../../context/AuthContext";
+import { fetchBoardList } from "../../api/board";
 
 const BoardMain = () => {
   const navigate = useNavigate();
@@ -14,45 +14,50 @@ const BoardMain = () => {
   const { showAlert } = useAlert();
   const { isLoggedIn, isLoading } = useAuth();
 
+  const [posts, setPosts] = useState([]);
+
   useEffect(() => {
     if (tabFromUrl === "notice") setActiveTab("notice");
     else setActiveTab("free");
   }, [tabFromUrl]);
 
-  const noticePosts = mockPosts
-    .filter((post) => post.isNotice)
-    .sort((a, b) => b.id - a.id);
+  // 게시글 불러오기
 
-  const generalPosts = mockPosts
-    .filter((post) => !post.isNotice)
-    .sort((a, b) => b.id - a.id);
+  useEffect(() => {
+    fetchBoardList()
+      .then(setPosts)
+      .catch((err) => {
+        console.error("게시글 불러오기 실패", err);
+      });
+  }, []);
 
-  const handlePostClick = (id) => navigate(`/board/${id}`);
+  const noticePosts = posts.filter((post) => post.notice);
+  const generalPosts = posts.filter((post) => !post.notice);
 
-    // 글쓰기 버튼 클릭
-	const handleWriteClick = async () => {
-		if (isLoading) return; // 로딩중은 대기
-		if (!isLoggedIn) {
-		await showAlert({
-			title: "로그인이 필요합니다.",
-			text: "로그인 후 이용해 주세요.",
-			icon: "warning",
-		});
-		navigate("/login");
-		return;
-		}
-		navigate("/board/write");
-	};
+  const handlePostClick = (postNo) => navigate(`/board/${postNo}`);
+
+  const handleWriteClick = async () => {
+    if (isLoading) return;
+    if (!isLoggedIn) {
+      await showAlert({
+        title: "로그인이 필요합니다.",
+        text: "로그인 후 이용해 주세요.",
+        icon: "warning",
+      });
+      navigate("/login");
+      return;
+    }
+    navigate("/board/write");
+  };
 
   return (
-    <Box sx={{ px: 3, py: 5, maxWidth: 1000, mx: "auto", minHeight : "857px" }}>
+    <Box sx={{ px: 3, py: 5, maxWidth: 1000, mx: "auto", minHeight: "857px" }}>
       <Typography variant="h4" gutterBottom textAlign="center">
         📌 자유게시판
       </Typography>
 
       <MiniTabBar activeTab={activeTab} onTabChange={setActiveTab} />
 
-      {/* 리스트 헤더 */}
       <Box
         sx={{
           display: "flex",
@@ -75,8 +80,8 @@ const BoardMain = () => {
         {activeTab === "notice" &&
           noticePosts.map((post) => (
             <Box
-              key={post.id}
-              onClick={() => handlePostClick(post.id)}
+              key={post.postNo}
+              onClick={() => handlePostClick(post.postNo)}
               sx={{
                 display: "flex",
                 justifyContent: "space-between",
@@ -92,8 +97,8 @@ const BoardMain = () => {
                 📣 {post.title}
               </Box>
               <Box sx={{ flex: 1, textAlign: "center" }}>{post.author}</Box>
-              <Box sx={{ flex: 2, textAlign: "center" }}>{post.createdAt}</Box>
-              <Box sx={{ flex: 1, textAlign: "right" }}>{post.views}</Box>
+              <Box sx={{ flex: 2, textAlign: "center" }}>{post.createdAt?.split("T")[0]}</Box>
+              <Box sx={{ flex: 1, textAlign: "right" }}>{post.viewCount}</Box>
             </Box>
           ))}
 
@@ -101,8 +106,8 @@ const BoardMain = () => {
           <>
             {noticePosts.map((post) => (
               <Box
-                key={post.id}
-                onClick={() => handlePostClick(post.id)}
+                key={post.postNo}
+                onClick={() => handlePostClick(post.postNo)}
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -118,15 +123,15 @@ const BoardMain = () => {
                   📣 {post.title}
                 </Box>
                 <Box sx={{ flex: 1, textAlign: "center" }}>{post.author}</Box>
-                <Box sx={{ flex: 2, textAlign: "center" }}>{post.createdAt}</Box>
-                <Box sx={{ flex: 1, textAlign: "right" }}>{post.views}</Box>
+                <Box sx={{ flex: 2, textAlign: "center" }}>{post.createdAt?.split("T")[0]}</Box>
+                <Box sx={{ flex: 1, textAlign: "right" }}>{post.viewCount}</Box>
               </Box>
             ))}
 
             {generalPosts.map((post) => (
               <Box
-                key={post.id}
-                onClick={() => handlePostClick(post.id)}
+                key={post.postNo}
+                onClick={() => handlePostClick(post.postNo)}
                 sx={{
                   display: "flex",
                   justifyContent: "space-between",
@@ -140,20 +145,19 @@ const BoardMain = () => {
               >
                 <Box sx={{ flex: 3 }}>📝 {post.title}</Box>
                 <Box sx={{ flex: 1, textAlign: "center" }}>{post.author}</Box>
-                <Box sx={{ flex: 2, textAlign: "center" }}>{post.createdAt}</Box>
-                <Box sx={{ flex: 1, textAlign: "right" }}>{post.views}</Box>
+                <Box sx={{ flex: 2, textAlign: "center" }}>{post.createdAt?.split("T")[0]}</Box>
+                <Box sx={{ flex: 1, textAlign: "right" }}>{post.viewCount}</Box>
               </Box>
             ))}
           </>
         )}
       </Box>
 
-		{/* 글쓰기 버튼 */}
-		<Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4 }}>
-			<Button variant="contained" onClick={handleWriteClick}>
-			글쓰기
-			</Button>
-		</Box>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 4 }}>
+        <Button variant="contained" onClick={handleWriteClick}>
+          글쓰기
+        </Button>
+      </Box>
     </Box>
   );
 };

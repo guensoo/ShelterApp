@@ -9,34 +9,35 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
+    // 초기화 로직
+    const user = JSON.parse(localStorage.getItem('loginUser'));
     if (user) {
       setLoginUser(user);
       setIsLoggedIn(true);
-      setIsAdmin(user.userId?.toLowerCase() === 'admin');
+      setIsAdmin(user.username?.toLowerCase() === 'admin');
     } else {
-      setIsLoggedIn(false);  // 없으면 반드시 false로 설정
+      setIsLoggedIn(false);
       setIsAdmin(false);
     }
-    setIsLoading(false);
+    setIsLoading(false); // 여기서만 false!
   }, []);
 
   const login = (userData) => {
-    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('loginUser', JSON.stringify(userData));
     setLoginUser(userData);
     setIsLoggedIn(true);
-    setIsAdmin(userData.userId?.toLowerCase() === 'admin');
+    setIsAdmin(userData.username?.toLowerCase() === 'admin');
   };
 
   const logout = () => {
-    localStorage.removeItem('user');
+    localStorage.removeItem('loginUser');
     setLoginUser(null);
     setIsLoggedIn(false);
     setIsAdmin(false);
   };
 
   return (
-    <AuthContext.Provider value={{ loginUser, isLoggedIn, isAdmin, login, logout }}>
+    <AuthContext.Provider value={{ loginUser, isLoggedIn, isAdmin, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

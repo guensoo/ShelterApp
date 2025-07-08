@@ -1,8 +1,5 @@
 package com.shelter.shelter_api.User;
 
-import com.shelter.shelter_api.DTO.LoginRequest;
-import com.shelter.shelter_api.DTO.SignupRequest;
-import com.shelter.shelter_api.Enum.Role;
 import com.shelter.shelter_api.Security.JwtProvider;
 import com.shelter.shelter_api.jwt.JwtTokenResponse;
 import jakarta.servlet.http.HttpServletRequest;

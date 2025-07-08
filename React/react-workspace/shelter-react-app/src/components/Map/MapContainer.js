@@ -40,7 +40,7 @@ const MapContainer = ({ shelters = [] }) => {
     if (document.getElementById(NAVER_MAP_SCRIPT_ID)) return;
     const script = document.createElement("script");
     script.id = NAVER_MAP_SCRIPT_ID;
-    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.REACT_APP_NAVER_MAP_API_KEY}`;
+    script.src = `https://oapi.map.naver.com/openapi/v3/maps.js?ncpKeyId=${process.env.REACT_APP_NAVER_MAP_CLIENT_ID}`;
     script.async = true;
     script.onload = () => setIsMapReady(true);
     document.head.appendChild(script);

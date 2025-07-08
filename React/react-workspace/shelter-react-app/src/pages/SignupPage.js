@@ -7,6 +7,7 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { signupUser } from "../api/user"; // 🔥 백엔드 API 연동
+import { useAlert } from "../context/AlertContext";
 
 const idRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]{5,16}$/;
 const pwRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,20}$/;
@@ -22,6 +23,7 @@ const SignupPage = () => {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
 
   const handleEmailChange = (e) => {
     const val = e.target.value;
@@ -53,11 +55,23 @@ const SignupPage = () => {
     if (!(isValidId && isValidPw && pwMatch && !emailError && email)) return;
 
     try {
-      const res = await signupUser(email, userId, userId, pw); // userId → username, nickname
-      alert(res); // 서버 응답 메시지
+      // username, nickname → userId로 전달
+      const res = await signupUser({
+        email,
+        username: userId,
+        nickname: userId,
+        password: pw,
+      });
+      await showAlert({
+        title: res || "회원가입이 완료되었습니다!",
+        icon: "success",
+      });
       navigate("/login");
     } catch (err) {
-      alert(err.message || "회원가입 실패");
+      await showAlert({
+        title: err.message || "회원가입 실패",
+        icon: "error",
+      });
     }
   };
 

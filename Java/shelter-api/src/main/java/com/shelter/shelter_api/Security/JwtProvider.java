@@ -26,8 +26,7 @@ public class JwtProvider {
     // 초기화 시 시크릿키를 Base64로 인코딩해서 key로 변환
     @PostConstruct
     public void init() {
-        byte[] keyBytes = Base64.getEncoder().encode(secretKey.getBytes());
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+    	this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
     // 토큰 생성

@@ -27,6 +27,9 @@ const LoginPage = ({ setIsLoggedIn }) => {
 
       const user = await fetchMe(); // ✅ 토큰으로 유저 정보 조회
       login(user); // ✅ Context에 저장 (로컬 X)
+
+      localStorage.setItem("loginUser", JSON.stringify(user));
+      
       setIsLoggedIn(true);
       setErrorMsg("");
 

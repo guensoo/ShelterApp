@@ -13,9 +13,14 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import { submitReport } from "../../api/report";
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import { useAlert } from "../../context/AlertContext";
 
 const ReportForm = () => {
+  const navigate = useNavigate();
+  const { showAlert } = useAlert();
   const [formData, setFormData] = useState({
     shelterName: '',
     shelterType: '',
@@ -32,15 +37,40 @@ const ReportForm = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.agree) {
-      alert("제보 내용 수집에 동의해야 제출할 수 있습니다.");
+      await showAlert({
+        title: "동의가 필요합니다.",
+        text: "제보 내용 수집에 동의해야 제출할 수 있습니다.",
+        icon: "warning",
+      });
       return;
     }
 
-    console.log("📨 제출된 제보:", formData);
-    alert("제보가 성공적으로 제출되었습니다!");
+    const payload = {
+      shelterName: formData.shelterName,
+      shelterType: formData.shelterType,
+      reportType: formData.reportType,
+      content: formData.description, // 백엔드 DTO 기준
+      agreed: formData.agree,
+    };
+
+    try {
+      await submitReport(payload);
+      await showAlert({
+        title: "제보 완료",
+        text: "제보가 성공적으로 제출되었습니다.",
+        icon: "success",
+      });
+      navigate("/"); // 성공 후 홈으로 이동
+    } catch (err) {
+      await showAlert({
+        title: "제보 실패",
+        text: err.message || "문제가 발생했습니다.",
+        icon: "error",
+      });
+    }
   };
 
   return (
