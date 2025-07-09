@@ -21,14 +21,13 @@ jobs:
           distribution: 'temurin'
 
       - name: Build Spring Boot Project
-        run: chmod +x./gradlew
         working-directory: ./Java/shelter-api
-        run: ./gradlew clean build
+        run: chmod +x ./gradlew clean build
 
       # ✅ gradlew 실행 권한 부여
       - name: Give execute permission to gradlew
         working-directory: ./Java/shelter-api
-        run: chmod +x gradlew
+        run: chmod +x ./gradlew
 
       - name: Build Spring Boot Project
         working-directory: ./Java/shelter-api
