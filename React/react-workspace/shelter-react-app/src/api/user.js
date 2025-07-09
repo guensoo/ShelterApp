@@ -18,7 +18,7 @@ export const loginUser = async (username, password) => {
 
   return await res.json(); // { token: "..." }
 };
-
+ 
 /**
  * 회원가입 (email, username, nickname, password)
  * @param {Object} userData - { email, username, nickname, password }
