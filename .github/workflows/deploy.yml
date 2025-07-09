@@ -81,14 +81,6 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           timeout: 600s
           script: |
-            bash -c '
-              echo "✅ 기존 프로세스 종료 중..."
-              pkill -f 'java -jar' || true
-        
-              echo "✅ 새 jar 실행 중 (nohup + disown)"
-              nohup java -jar ~/app/*.jar > ~/app/log.txt 2>&1 < /dev/null & disown;
-        
-              echo "✅ 백엔드 재시작 명령 완료"
-            '
-            exit 0
+              bash ~/deploy.sh
+              exit 0
       
