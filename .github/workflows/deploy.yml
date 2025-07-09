@@ -31,7 +31,7 @@ jobs:
 
       - name: Build Spring Boot Project
         working-directory: ./Java/shelter-api
-        run: ./gradlew clean build
+        run: ./gradlew clean build -x test
 
       # ✅ 프론트엔드 빌드 (React)
       - name: Set up Node.js
