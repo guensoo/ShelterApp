@@ -45,7 +45,7 @@ jobs:
       - name: Build React App
         working-directory: ./React/react-workspace/shelter-react-app
         run: |
-          npm install
+          npm install --legacy-peer-deps
           npm run build
 
       # ✅ 프론트엔드 S3에 업로드
