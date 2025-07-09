@@ -74,7 +74,7 @@ jobs:
 
       # ✅ EC2에서 서버 재시작
       - name: Restart backend on EC2
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@0.1.9
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -86,3 +86,4 @@ jobs:
             echo "새 jar 실행 중..."
             nohup java -jar ~/app/*.jar > ~/app/log.txt 2>&1 &
             echo "재시작 명령 완료"
+            exit 0
