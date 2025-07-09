@@ -1,5 +1,5 @@
-// const API_BASE_URL = 'http://shelter-backend-env.eba-myyifqwh.ap-northeast-2.elasticbeanstalk.com';
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = 'http://shelter-backend-env.eba-myyifqwh.ap-northeast-2.elasticbeanstalk.com';
+// const API_BASE_URL = 'http://localhost:5000';
 
 /**
  * 게시글 전체 조회

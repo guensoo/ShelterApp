@@ -1,4 +1,3 @@
-// src/api/naverReverseGeocode.js
 import axios from "axios";
 
 // 환경변수에서 키 읽기 (반드시 .env에 실제 값 넣기)

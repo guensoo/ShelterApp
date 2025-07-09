@@ -1,4 +1,3 @@
-// src/api/geocode.js
 export function addressToLatLng(address) {
   return new Promise((resolve, reject) => {
     if (!window.naver || !window.naver.maps) return reject("네이버맵 미로드");
