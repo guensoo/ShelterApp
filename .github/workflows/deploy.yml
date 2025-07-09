@@ -81,9 +81,12 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           timeout: 600s
           script: |
-            echo "기존 프로세스 종료 중..."
+            echo "✅ 기존 프로세스 종료 중..."
             pkill -f 'java -jar' || true
-            echo "새 jar 실행 중..."
-            setsid java -jar ~/app/*.jar > ~/app/log.txt 2>&1 < /dev/null &
-            echo "재시작 명령 완료"
+      
+            echo "✅ 새 jar 실행 중 (nohup + disown)"
+            bash -c "nohup java -jar ~/app/*.jar > ~/app/log.txt 2>&1 < /dev/null & disown"
+      
+            echo "✅ 백엔드 재시작 명령 완료"
             exit 0
+      
