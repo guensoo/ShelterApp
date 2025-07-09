@@ -17,7 +17,7 @@ const BoardWrite = () => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [setUploadedFiles] = useState([]);
   const [isPrivate, setIsPrivate] = useState(false);
   const [password, setPassword] = useState("");
   const [isNotice, setIsNotice] = useState(false);

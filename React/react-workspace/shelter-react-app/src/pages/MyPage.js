@@ -2,22 +2,20 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Box, Typography, List, ListItem, ListItemText, Divider, Paper,
-    Button, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions,
-    Snackbar, Alert, CircularProgress
+    Button, CircularProgress
 } from "@mui/material";
 import { useAlert } from "../context/AlertContext";
 import { useAuth } from "../context/AuthContext";
-import { deleteUser, fetchFavoriteShelters, fetchScrapPosts, removeScrapPost } from "../api/user";
+import { deleteUser, fetchScrapPosts, removeScrapPost } from "../api/user";
 
 const MyPage = () => {
     const navigate = useNavigate();
     const { loginUser, isLoggedIn, isLoading, logout } = useAuth(); // 👈 context 사용
-    const [favoriteShelters, setFavoriteShelters] = useState([]);
+    const [favoriteShelters] = useState([]);
     const [scrapPosts, setScrapPosts] = useState([]);
     const { showAlert, showToast } = useAlert();
     const [isWithdrawing, setIsWithdrawing] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [removingScrapId, setRemovingScrapId] = useState(null);
 
 
     const handleWithdraw = async () => {

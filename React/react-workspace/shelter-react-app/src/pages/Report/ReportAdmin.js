@@ -24,7 +24,7 @@ const ReportAdmin = () => {
         showAlert({ title: "관리자만 접근 가능합니다.", icon: "error" }).then(() => navigate("/", { replace: true }));
       }
     }
-  }, [isLoading, isLoggedIn, isAdmin]);
+  }, [isLoading, isLoggedIn, isAdmin, navigate, showAlert]);
 
   useEffect(() => {
     if (isAdmin) {

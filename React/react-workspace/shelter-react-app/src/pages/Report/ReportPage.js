@@ -38,7 +38,6 @@ const ReportPage = () => {
         minHeight: "85vh",
         backgroundColor: "#f5f5f5",
         px: 2,
-        minHeight : "858px"
       }}
     >
       <Paper

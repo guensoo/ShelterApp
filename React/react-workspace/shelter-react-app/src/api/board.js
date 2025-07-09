@@ -19,8 +19,6 @@ export const fetchBoardList = async () => {
  * 게시글 상세 조회
  */
 export const fetchBoardDetail = async (postNo) => {
-  const token = localStorage.getItem('token');
-  //   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   const res = await fetch(`${API_BASE_URL}/board/${postNo}`,);
 

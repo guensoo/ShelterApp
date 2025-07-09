@@ -11,7 +11,6 @@ const isValidEmail = (email) =>
 const FindAccount = () => {
   // --- 아이디 찾기 ---
   const [findEmail, setFindEmail] = useState('');
-  const [findAuth, setFindAuth] = useState('');
   const [findVerified, setFindVerified] = useState(false);
   const [foundId, setFoundId] = useState(null);
   const [findAlert, setFindAlert] = useState({ type: '', msg: '' });

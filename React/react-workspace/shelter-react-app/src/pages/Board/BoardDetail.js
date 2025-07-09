@@ -17,7 +17,7 @@ const BoardDetail = () => {
     const initialLikeCount = 0;
 
     const [post, setPost] = useState(null);
-    const [comments, setComments] = useState([]); // 댓글도 API 연동 필요하면 여기에 set
+    const [comments] = useState([]); // 댓글도 API 연동 필요하면 여기에 set
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
