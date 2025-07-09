@@ -15,6 +15,7 @@ import BoardEdit from './pages/Board/BoardEdit';
 import FindAccount from './pages/FindAccount';
 import ReportAdmin from "./pages/Report/ReportAdmin";
 import { FavoriteProvider } from './context/FavoriteContext';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 import './App.css';
 
 function App() {
@@ -56,6 +57,7 @@ function App() {
                     <Route path="/board/:id" element={<BoardDetail />} />
                     <Route path="/board/edit/:id" element={<BoardEdit />} />
                     <Route path="/board/write" element={<BoardWrite />} />
+                    <Route path="/reset-password" element={<ResetPasswordPage />} />
                 </Routes>
                 </Box>
                 <Footer />

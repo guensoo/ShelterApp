@@ -1,136 +1,145 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Divider,
+  Box, Paper, TextField, Button, Typography, Divider, Collapse, Alert, Stack
 } from '@mui/material';
+
+import { findUserId, sendResetLink } from '../api/user';
 
 const isValidEmail = (email) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
 const FindAccount = () => {
-  const [email, setEmail] = useState('');
-  const [isEmailValid, setIsEmailValid] = useState(false);
-  const [authCode, setAuthCode] = useState('');
-  const [sentCode, setSentCode] = useState('');
-  const [authVerified, setAuthVerified] = useState(false);
+  // --- 아이디 찾기 ---
+  const [findEmail, setFindEmail] = useState('');
+  const [findAuth, setFindAuth] = useState('');
+  const [findVerified, setFindVerified] = useState(false);
   const [foundId, setFoundId] = useState(null);
+  const [findAlert, setFindAlert] = useState({ type: '', msg: '' });
+
+  // --- 비밀번호 찾기 ---
+  const [pwId, setPwId] = useState('');
+  const [pwEmail, setPwEmail] = useState('');
+  const [pwAlert, setPwAlert] = useState({ type: '', msg: '' });
   const [pwResetSent, setPwResetSent] = useState(false);
-  const [showAuthField, setShowAuthField] = useState(false);
+  const [sendingPwMail, setSendingPwMail] = useState(false);
 
-  // 이메일 유효성 실시간 체크
-  useEffect(() => {
-    setIsEmailValid(isValidEmail(email));
-  }, [email]);
-
-  // 인증번호 전송 (모의)
-  const handleSendAuthCode = () => {
-    if (!isEmailValid) return;
-
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
-    setSentCode(code);
-    alert(`📨 인증번호 [${code}] 이메일로 보냈다고 가정함`);
-    setShowAuthField(true);
-  };
-
-  // 인증번호 확인
-  const handleVerifyCode = () => {
-    if (authCode === sentCode) {
-      setAuthVerified(true);
-      alert('✅ 인증 성공!');
-      setFoundId('mockUser123'); // ✅ 인증 성공과 동시에 아이디 세팅!
-    } else {
-      alert('❌ 인증번호가 일치하지 않습니다.');
+  // 아이디 찾기 - 이메일 인증 및 서버 연동
+  const handleFindVerify = async () => {
+    setFindAlert({ type: '', msg: '' });
+    if (!isValidEmail(findEmail)) return;
+    try {
+      const result = await findUserId(findEmail);
+      setFoundId(result.username);
+      setFindVerified(true);
+      setFindAlert({ type: 'success', msg: `이메일 인증 성공! (아이디: ${result.username})` });
+    } catch (err) {
+      setFoundId(null);
+      setFindVerified(false);
+      setFindAlert({ type: 'error', msg: err.message || '아이디 찾기 실패' });
     }
   };
 
-  // ID 찾기 처리
-  const handleFindId = () => {
-    setFoundId('mockUser123'); // mock
-  };
-
-  // 비밀번호 재설정 처리
-  const handleSendResetLink = () => {
-    setPwResetSent(true);
-    alert('🔑 비밀번호 재설정 링크를 전송했습니다.');
+  // 비밀번호 찾기 - 서버 연동
+  const handleSendPwReset = async () => {
+    setPwAlert({ type: '', msg: '' });
+    setSendingPwMail(true);
+    try {
+      const msg = await sendResetLink(pwId, pwEmail);
+      setPwResetSent(true);
+      setPwAlert({ type: 'success', msg });
+    } catch (err) {
+      setPwResetSent(false);
+      setPwAlert({ type: 'error', msg: err.message || '메일 발송 실패' });
+    }
+    setSendingPwMail(false);
   };
 
   return (
-    <Box sx={{ maxWidth: 400, mx: 'auto', mt: 5 }}>
-      <Typography variant="h5" gutterBottom>
-        🔍 ID / 비밀번호 찾기
-      </Typography>
+    <Box sx={{ maxWidth: 420, mx: 'auto', mt: 8 }}>
+      <Paper sx={{ p: 4, boxShadow: 4, borderRadius: 3 }}>
+        <Typography variant="h5" fontWeight="bold" align="center" gutterBottom>
+          🔍 아이디/비밀번호 찾기
+        </Typography>
+        <Typography variant="body2" color="text.secondary" align="center" mb={3}>
+          이메일 인증이 필요합니다.
+        </Typography>
 
-      <TextField
-        label="이메일"
-        fullWidth
-        margin="normal"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        error={email && !isEmailValid}
-        helperText={
-          email && !isEmailValid ? '유효한 이메일 형식을 입력하세요.' : ' '
-        }
-      />
-
-      <Button
-        fullWidth
-        variant="contained"
-        onClick={handleSendAuthCode}
-        sx={{ mt: 1 }}
-        disabled={!isEmailValid || authVerified}
-      >
-        인증번호 전송
-      </Button>
-
-      {showAuthField && !authVerified && (
-        <>
+        {/* ---------------- 아이디 찾기 ---------------- */}
+        <Typography variant="subtitle1" fontWeight="bold" sx={{ mt: 1 }}>
+          아이디 찾기
+        </Typography>
+        <Stack spacing={1} mt={1} mb={2}>
           <TextField
-            label="인증번호 입력"
-            fullWidth
-            margin="normal"
-            value={authCode}
-            onChange={(e) => setAuthCode(e.target.value)}
+            label="가입 이메일"
+            value={findEmail}
+            onChange={e => setFindEmail(e.target.value)}
+            disabled={findVerified}
           />
+          <Collapse in={!!findAlert.msg}>
+            <Alert
+              severity={findAlert.type || 'info'}
+              sx={{ mb: 1 }}
+              onClose={() => setFindAlert({ type: '', msg: '' })}
+            >
+              {findAlert.msg}
+            </Alert>
+          </Collapse>
           <Button
-            fullWidth
-            variant="outlined"
-            onClick={handleVerifyCode}
-            sx={{ mt: 1 }}
+            variant="contained"
+            onClick={handleFindVerify}
+            disabled={!isValidEmail(findEmail) || findVerified}
           >
-            인증 확인
+            아이디 찾기
           </Button>
-        </>
-      )}
+          <Collapse in={findVerified && foundId}>
+            <Box sx={{ my: 1, textAlign: 'center' }}>
+              {/* 아이디 찾은 결과 출력 */}
+            </Box>
+          </Collapse>
+        </Stack>
 
-      {authVerified && (
-        <>
-          {foundId && (
-            <Typography sx={{ mt: 2 }}>
-              ✅ ID: <b>{foundId}</b>
-            </Typography>
-          )}
+        <Divider sx={{ my: 4 }} />
 
-          <Divider sx={{ my: 3 }} />
-
+        {/* ---------------- 비밀번호 찾기 ---------------- */}
+        <Typography variant="subtitle1" fontWeight="bold" sx={{ mt: 1 }}>
+          비밀번호 재설정
+        </Typography>
+        <Stack spacing={1} mt={1} mb={2}>
+          <TextField
+            label="아이디"
+            value={pwId}
+            onChange={e => setPwId(e.target.value)}
+            disabled={pwResetSent && !sendingPwMail}
+          />
+          <TextField
+            label="이메일"
+            value={pwEmail}
+            onChange={e => setPwEmail(e.target.value)}
+            disabled={pwResetSent && !sendingPwMail}
+          />
+          <Collapse in={!!pwAlert.msg}>
+            <Alert
+              severity={pwAlert.type || 'info'}
+              sx={{ mb: 1 }}
+              onClose={() => setPwAlert({ type: '', msg: '' })}
+            >
+              {pwAlert.msg}
+            </Alert>
+          </Collapse>
           <Button
-            fullWidth
-            variant="outlined"
+            variant="contained"
             color="secondary"
-            onClick={handleSendResetLink}
+            onClick={handleSendPwReset}
+            disabled={!pwId || !isValidEmail(pwEmail) || sendingPwMail}
           >
-            비밀번호 재설정 링크 전송
+            {sendingPwMail
+              ? "전송 중..."
+              : pwResetSent
+                ? "재발송"
+                : "비밀번호 재설정 메일 전송"}
           </Button>
-
-          {pwResetSent && (
-            <Typography sx={{ mt: 2, color: 'green' }}>
-              📩 이메일로 재설정 링크를 보내드렸습니다!
-            </Typography>
-          )}
-        </>
-      )}
+        </Stack>
+      </Paper>
     </Box>
   );
 };

@@ -30,12 +30,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String uri = request.getRequestURI();
+    	String uri = request.getRequestURI();
 
-        if (uri.startsWith("/shelters") || uri.equals("/user/login") || uri.equals("/user/signup")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+    	if (
+    	    uri.startsWith("/shelters")
+    	    || uri.equals("/user/login")
+    	    || uri.equals("/user/signup")
+    	    || uri.equals("/user/send-reset-link")
+    	    || uri.equals("/user/reset-password")
+    	    || uri.equals("/user/find-id")
+    	) {
+    	    filterChain.doFilter(request, response);
+    	    return;
+    	}
 
         String token = resolveToken(request);
 

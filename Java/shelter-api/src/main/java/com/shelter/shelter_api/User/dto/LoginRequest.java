@@ -1,4 +1,4 @@
-package com.shelter.shelter_api.User;
+package com.shelter.shelter_api.User.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,6 +1,8 @@
-package com.shelter.shelter_api.User;
+package com.shelter.shelter_api.User.entity;
 
 import org.springframework.security.core.userdetails.UserDetails;
+
+import com.shelter.shelter_api.User.Role;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

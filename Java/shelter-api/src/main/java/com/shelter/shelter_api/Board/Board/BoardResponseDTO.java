@@ -19,8 +19,14 @@ public class BoardResponseDTO {
     private int reportCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
+    private boolean liked;      // ← 로그인한 유저가 추천한 글이면 true
+    private boolean reported;   // ← 로그인한 유저가 신고한 글이면 true
+    
     public static BoardResponseDTO fromEntity(BoardEntity e) {
+        return fromEntity(e, false, false); // 기본값: liked=false, reported=false
+    }
+
+    public static BoardResponseDTO fromEntity(BoardEntity e, boolean liked, boolean reported) {
         BoardResponseDTO dto = new BoardResponseDTO();
         dto.setId(e.getId());
         dto.setPostNo(e.getPostNo());
@@ -35,6 +41,9 @@ public class BoardResponseDTO {
         dto.setReportCount(e.getReportCount());
         dto.setCreatedAt(e.getCreatedAt());
         dto.setUpdatedAt(e.getUpdatedAt());
+        dto.setLiked(liked);
+        dto.setReported(reported);
         return dto;
     }
+    
 }

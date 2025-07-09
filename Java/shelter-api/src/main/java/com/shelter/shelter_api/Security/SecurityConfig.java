@@ -18,8 +18,8 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.shelter.shelter_api.User.Role;
-import com.shelter.shelter_api.User.UserEntity;
-import com.shelter.shelter_api.User.UserRepository;
+import com.shelter.shelter_api.User.entity.UserEntity;
+import com.shelter.shelter_api.User.repository.UserRepository;
 
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -61,10 +61,11 @@ public class SecurityConfig {
                                 "/user/login",
                                 "/shelters/**",
                                 "/board",
-                                "/board/{postNo}"
+                                "/board/{boardId}"
                         ).permitAll()
                         .requestMatchers("/report/**").authenticated()
-                        .requestMatchers("/board/write").authenticated()
+                        .requestMatchers("/board/write", "/board/{boardId}/liked", "/board/{boardId}/unliked", "/board/report").authenticated()
+                        .requestMatchers("/user/scraps", "/user/scraps/**").authenticated()
                         .requestMatchers("/report/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )

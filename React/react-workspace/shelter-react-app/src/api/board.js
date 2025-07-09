@@ -20,9 +20,9 @@ export const fetchBoardList = async () => {
  */
 export const fetchBoardDetail = async (postNo) => {
   const token = localStorage.getItem('token');
-//   const headers = token ? { Authorization: `Bearer ${token}` } : {};
+  //   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
-  const res = await fetch(`${API_BASE_URL}/board/${postNo}`, );
+  const res = await fetch(`${API_BASE_URL}/board/${postNo}`,);
 
   if (!res.ok) {
     const error = await res.text();
@@ -71,4 +71,75 @@ export const fetchBoardEdit = async (postNo) => {
   }
 
   return await res.json();
+};
+
+// 추천 상태 가져오기
+export const getLikedStatus = async (boardId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/board/${boardId}/liked`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error("추천 여부 조회 실패");
+  const data = await res.json();
+  return data.liked;
+};
+
+// 추천 API 호출
+export const likeBoardPost = async (boardId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/board/${boardId}/like`, {
+    method: "POST", // 또는 PATCH
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return await res.json();
+};
+
+export const unlikeBoardPost = async (boardId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/board/${boardId}/unlike`, {
+    method: 'DELETE',
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json"
+    }
+  });
+  if (!res.ok) {
+    throw new Error('추천 취소 실패');
+  }
+  return await res.json();
+};
+
+// 신고 API 호출
+export const reportBoardPost = async ({ boardId, reason }) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/api/report`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ boardId, reason }),
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return await res.text();
+};
+
+// 게시글 삭제 API
+export const deleteBoardPost = async (boardId) => {
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/board/${boardId}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!res.ok) throw new Error(await res.text());
+  return await res.text();
 };

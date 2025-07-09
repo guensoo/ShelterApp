@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,4 +58,15 @@ public class BoardController {
         BoardResponseDTO post = boardService.getPostByPostNo(postNo);
         return ResponseEntity.ok(post);
     }
+    
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteBoard(
+        @PathVariable("id") Long id,
+        @AuthenticationPrincipal UserDetails userDetails) {
+
+    String username = userDetails.getUsername();
+    boardService.deleteBoard(id, username);  // username 검사(작성자/관리자 체크)
+    return ResponseEntity.ok("게시글이 삭제되었습니다.");
+}
 }
