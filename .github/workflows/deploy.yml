@@ -21,6 +21,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Build Spring Boot Project
+        run: chmod +x./gradlew
         working-directory: ./Java/shelter-api
         run: ./gradlew clean build
 
