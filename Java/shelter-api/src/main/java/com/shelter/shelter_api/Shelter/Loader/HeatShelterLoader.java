@@ -1,8 +1,5 @@
 package com.shelter.shelter_api.Shelter.Loader;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -18,26 +15,26 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class HeatShelterLoader {
-//    @PostConstruct
-//    public void init() {
-//        try {
-//            loadHeatShelters();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//    }
-    
+    @PostConstruct
+    public void init() {
+    	System.out.println("==== HeatShelterLoader init 실행 ====");
+        try {
+            loadHeatShelters();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     private final HeatShelterRepository repository;
 
     @Value("${api.heat.service-key}")
     private String serviceKey;
 
-    // @Scheduled(cron = "0 0 0 1 * ?") // 필요하면 활성화
+    // @Scheduled(cron = "0 0 0 1 * ?")
     public void loadHeatShelters() throws Exception {
         int totalCount = 1, pageNo = 1, numOfRows = 100;
         RestTemplate restTemplate = new RestTemplate();
         ObjectMapper objectMapper = new ObjectMapper();
-        List<HeatShelterEntity> entities = new ArrayList<>();
 
         do {
             String url = "https://www.safetydata.go.kr/V2/api/DSSP-IF-10942"
@@ -45,7 +42,6 @@ public class HeatShelterLoader {
                     + "&pageNo=" + pageNo
                     + "&numOfRows=" + numOfRows
                     + "&returnType=json";
-
             String result = restTemplate.getForObject(url, String.class);
             JsonNode root = objectMapper.readTree(result);
 
@@ -58,8 +54,8 @@ public class HeatShelterLoader {
                 for (JsonNode item : body) {
                     String rstrFcltyNo = item.path("RSTR_FCLTY_NO").asText();
 
-                    List<HeatShelterEntity> existingList = repository.findByRstrFcltyNo(rstrFcltyNo);
-                    HeatShelterEntity entity = existingList.isEmpty() ? new HeatShelterEntity() : existingList.get(0);
+                    HeatShelterEntity entity = repository.findByRstrFcltyNo(rstrFcltyNo)
+                            .stream().findFirst().orElse(new HeatShelterEntity());
 
                     entity.setRstrFcltyNo(rstrFcltyNo);
                     entity.setYear(item.path("YEAR").asText());
@@ -94,13 +90,10 @@ public class HeatShelterLoader {
                     entity.setWkendHdayOperEndTime(item.path("WKEND_HDAY_OPER_END_TIME").asText());
                     entity.setFcltySclas(item.path("FCLTY_SCLAS").asText());
 
-                    entities.add(entity);
+                    repository.save(entity); // 개별 저장
                 }
             }
-
             pageNo++;
-        } while (entities.size() < totalCount);
-
-        repository.saveAll(entities); // 한 번에 저장 (insert or update)
+        } while (pageNo * numOfRows < totalCount);
     }
 }
