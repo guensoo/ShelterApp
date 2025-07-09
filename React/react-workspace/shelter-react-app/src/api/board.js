@@ -143,3 +143,22 @@ export const deleteBoardPost = async (boardId) => {
   if (!res.ok) throw new Error(await res.text());
   return await res.text();
 };
+
+// 파일업로드
+export const uploadFileToS3 = async (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const token = localStorage.getItem("token");
+  const res = await fetch(`${API_BASE_URL}/api/files/upload`, {
+    
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!res.ok) throw new Error("파일 업로드 실패");
+  return await res.text(); // 업로드된 S3 URL
+};

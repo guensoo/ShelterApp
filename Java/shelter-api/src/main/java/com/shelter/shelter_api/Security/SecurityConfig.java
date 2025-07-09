@@ -64,7 +64,7 @@ public class SecurityConfig {
                                 "/board/{boardId}"
                         ).permitAll()
                         .requestMatchers("/report/**").authenticated()
-                        .requestMatchers("/board/write", "/board/{boardId}/liked", "/board/{boardId}/unliked", "/board/report").authenticated()
+                        .requestMatchers("/board/write", "/board/{boardId}/liked", "/board/{boardId}/unliked", "/board/report", "/api/files/upload").authenticated()
                         .requestMatchers("/user/scraps", "/user/scraps/**").authenticated()
                         .requestMatchers("/report/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()

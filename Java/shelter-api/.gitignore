@@ -35,3 +35,17 @@ out/
 
 ### VS Code ###
 .vscode/
+
+###✅ 환경 변수 파일 숨김###
+.env
+.env.*
+
+###✅ 민감한 Spring 설정파일 숨김 (있는 경우)###
+src/main/resources/application-secret.yml
+src/main/resources/application-secret.properties
+
+###✅ 로그파일 (선택사항)###
+*.log
+
+###✅ 자바 keystore (선택사항)###
+*.jks
