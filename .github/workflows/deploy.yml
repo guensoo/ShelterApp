@@ -81,7 +81,7 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           timeout: 600s
           script: |
-            bash -c ''
+            bash -c '
               echo "✅ 기존 프로세스 종료 중..."
               pkill -f 'java -jar' || true
         
