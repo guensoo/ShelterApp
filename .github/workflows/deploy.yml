@@ -85,6 +85,4 @@ jobs:
             pkill -f 'java -jar' || true
             echo "새 jar 실행 중..."
             nohup java -jar ~/app/*.jar > ~/app/log.txt 2>&1 &
-            disown
-            exit 0
             echo "재시작 명령 완료"
