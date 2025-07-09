@@ -83,3 +83,4 @@ jobs:
           script: |
             pkill -f 'java -jar' || true
             nohup java -jar ~/app/*.jar > ~/app/log.txt 2>&1 &
+            sleep 5
