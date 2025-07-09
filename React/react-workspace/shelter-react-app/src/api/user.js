@@ -28,7 +28,7 @@ export const signupUser = async ({ email, username, nickname, password }) => {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, username, nickname, password }),
-  });
+  }); 
 
   if (!res.ok) {
     const error = await res.text();
