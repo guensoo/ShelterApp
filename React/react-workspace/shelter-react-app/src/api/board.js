@@ -13,7 +13,11 @@ export const fetchBoardList = async () => {
 // 게시글 상세 조회
 export const fetchBoardDetail = async (postNo) => {
   try {
-    const res = await API.get(`/board/${postNo}`);
+    const res = await API.get(`/board/${postNo}`, {
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    });
     return res.data;
   } catch (err) {
     throw err.response?.data?.message || err.message || '게시글 상세 조회 실패';
@@ -23,7 +27,12 @@ export const fetchBoardDetail = async (postNo) => {
 // 게시글 작성
 export const createBoard = async (postData) => {
   try {
-    const res = await API.post('/board/write', postData);
+    const token = localStorage.getItem('token'); // 토큰 저장 위치에 맞게 조정
+    const res = await API.post('/board/write', postData, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return res.data;
   } catch (err) {
     throw err.response?.data?.message || err.message || '게시글 작성 실패';
@@ -33,7 +42,11 @@ export const createBoard = async (postData) => {
 // 게시글 수정 상세 조회 (수정 페이지 진입 시)
 export const fetchBoardEdit = async (postNo) => {
   try {
-    const res = await API.get(`/board/${postNo}`);
+    const res = await API.get(`/board/${postNo}`, {
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    });
     return res.data;
   } catch (err) {
     throw err.response?.data?.message || err.message || '게시글 수정 조회 실패';
@@ -42,10 +55,19 @@ export const fetchBoardEdit = async (postNo) => {
 
 // 추천 상태 가져오기
 export const getLikedStatus = async (boardId) => {
+  const token = localStorage.getItem('token');
+  if (!token) return false; // 로그인 안 했으면 추천 안한 걸로
+
   try {
-    const res = await API.get(`/board/${boardId}/liked`);
+    const res = await API.get(`/board/${boardId}/liked`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return res.data.liked;
   } catch (err) {
+    // 403은 추천 안함으로 처리
+    if (err.response?.status === 403) return false;
     throw err.response?.data?.message || err.message || '추천 여부 조회 실패';
   }
 };
@@ -101,5 +123,46 @@ export const uploadFileToS3 = async (file) => {
     return res.data;
   } catch (err) {
     throw err.response?.data?.message || err.message || '파일 업로드 실패';
+  }
+};
+
+// 댓글 목록 조회 (게시글 ID로)
+export const fetchComments = async (boardId) => {
+  console.log("fetchComments 호출, boardId:", boardId);
+  try {
+    const res = await API.get(`/comments/${boardId}`);
+    return res.data;
+  } catch (err) {
+    throw err.response?.data?.message || err.message || '댓글 목록 조회 실패';
+  }
+};
+
+export const postComment = async (boardId, content) => {
+  console.log("postComment 호출, boardId:", boardId, "content:", content);
+  try {
+    const res = await API.post(`/comments/${boardId}`, { content });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data?.message || err.message || '댓글 작성 실패';
+  }
+};
+
+// 댓글 수정
+export const updateComment = async (commentId, content) => {
+  try {
+    const res = await API.put(`/comments/${commentId}`, { content });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data?.message || err.message || '댓글 수정 실패';
+  }
+};
+
+// 댓글 삭제
+export const deleteComment = async (commentId) => {
+  try {
+    const res = await API.delete(`/comments/${commentId}`);
+    return res.data;
+  } catch (err) {
+    throw err.response?.data?.message || err.message || '댓글 삭제 실패';
   }
 };

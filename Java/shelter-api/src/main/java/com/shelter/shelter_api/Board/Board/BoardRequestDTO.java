@@ -1,6 +1,6 @@
 package com.shelter.shelter_api.Board.Board;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 import lombok.Data;
 
@@ -11,8 +11,9 @@ public class BoardRequestDTO {
     private boolean isNotice;
     private boolean isPrivate;
     private String password;
-    
-    // ✅ DTO → Entity 변환
+    private List<BoardFileDTO> files;  // 첨부파일 리스트
+
+    // DTO → Entity 변환 (files는 여기서 직접 추가하지 않고 서비스단에서 처리하는게 좋음)
     public BoardEntity toEntity(String username, Long postNo) {
         BoardEntity entity = new BoardEntity();
         entity.setTitle(this.title);
@@ -22,6 +23,7 @@ public class BoardRequestDTO {
         entity.setPrivate(this.isPrivate);
         entity.setPassword(this.password);
         entity.setPostNo(postNo);
+        // files는 서비스에서 연동
         return entity;
     }
 }

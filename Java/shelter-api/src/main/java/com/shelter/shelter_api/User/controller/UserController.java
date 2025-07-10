@@ -1,23 +1,32 @@
 package com.shelter.shelter_api.User.controller;
 
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.shelter.shelter_api.Security.JwtProvider;
 import com.shelter.shelter_api.User.Role;
+import com.shelter.shelter_api.User.dto.ChangePasswordRequest;
 import com.shelter.shelter_api.User.dto.FindIdRequest;
 import com.shelter.shelter_api.User.dto.FindIdResponse;
 import com.shelter.shelter_api.User.dto.LoginRequest;
 import com.shelter.shelter_api.User.dto.ResetLinkRequest;
 import com.shelter.shelter_api.User.dto.ResetPasswordRequest;
 import com.shelter.shelter_api.User.dto.SignupRequest;
+import com.shelter.shelter_api.User.dto.UpdateNicknameRequest;
 import com.shelter.shelter_api.User.dto.UserDTO;
 import com.shelter.shelter_api.User.entity.UserEntity;
 import com.shelter.shelter_api.User.repository.UserRepository;
@@ -95,14 +104,16 @@ public class UserController {
     }
     
     @DeleteMapping("/delete")
-    public ResponseEntity<?> deleteUser(HttpServletRequest request) {
-        String token = jwtProvider.resolveToken(request);
-        if (token == null || !jwtProvider.validateToken(token)) {
-            return ResponseEntity.status(401).body("유효하지 않은 토큰입니다.");
-        }
-        String username = jwtProvider.getUsernameFromToken(token);
-        userService.deleteUserByUsername(username);
-        return ResponseEntity.ok("회원탈퇴가 완료되었습니다.");
+    public ResponseEntity<?> withdraw(@AuthenticationPrincipal UserDetails userDetails) {
+        userService.withdrawUser(userDetails.getUsername());
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+    }
+    
+    @DeleteMapping("/admin/delete-content/{username}")
+    @PreAuthorize("hasRole('ADMIN')") // 이거 있으면 권한 체크됨
+    public ResponseEntity<?> deleteUserContent(@PathVariable String username) {
+        userService.adminDeleteUserContent(username);  // 댓글 + 글 삭제
+        return ResponseEntity.ok("해당 사용자의 게시글과 댓글이 삭제되었습니다.");
     }
     
     // 1. 아이디 찾기
@@ -128,5 +139,20 @@ public class UserController {
         boolean ok = userService.updatePasswordByToken(request.getToken(), request.getNewPassword());
         if (!ok) return ResponseEntity.badRequest().body("토큰이 유효하지 않거나 만료되었습니다.");
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+    }
+    
+
+    @PutMapping("/nickname")
+    public ResponseEntity<?> updateNickname(@RequestBody UpdateNicknameRequest dto,
+                                            @AuthenticationPrincipal UserEntity user) {
+        userService.updateNickname(user, dto.getNickname());
+        return ResponseEntity.ok().body(Map.of("message", "닉네임 변경 완료"));
+    }
+
+    @PatchMapping("/password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest dto,
+                                            @AuthenticationPrincipal UserEntity user) {
+        userService.changePassword(user, dto.getCurrentPassword(), dto.getNewPassword());
+        return ResponseEntity.ok().body(Map.of("message", "비밀번호 변경 완료"));
     }
 }

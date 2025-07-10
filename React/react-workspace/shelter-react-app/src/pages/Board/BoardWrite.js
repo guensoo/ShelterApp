@@ -17,7 +17,7 @@ const BoardWrite = () => {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [setUploadedFiles] = useState([]);
+  const [uploadedFiles, setUploadedFiles] = useState([]);
   const [isPrivate, setIsPrivate] = useState(false);
   const [password, setPassword] = useState("");
   const [isNotice, setIsNotice] = useState(false);
@@ -61,6 +61,10 @@ const BoardWrite = () => {
       isPrivate,
       password: isPrivate ? password : null,
       isNotice: isAdmin ? isNotice : false,
+      files: uploadedFiles.map(file => ({
+        url: typeof file === 'string' ? file : file.url,
+        originalFilename: typeof file === 'string' ? "" : file.originalFilename || ""
+      }))
     };
 
     try {
@@ -132,7 +136,7 @@ const BoardWrite = () => {
           sx={{ mb: 2 }}
         />
       )}
-      
+
       <Box sx={{ mt: 2, textAlign: "right" }}>
         <Button variant="contained" onClick={handleSubmit}>
           등록

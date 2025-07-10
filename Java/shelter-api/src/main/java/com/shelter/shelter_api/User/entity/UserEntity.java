@@ -3,6 +3,7 @@ package com.shelter.shelter_api.User.entity;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.shelter.shelter_api.User.Role;
+import com.shelter.shelter_api.User.UserStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,10 +47,21 @@ public class UserEntity implements UserDetails {
     @Column(nullable = false)
     private Role role = Role.USER;
     
+    @Builder.Default
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 10)
+    private UserStatus status = UserStatus.ACTIVE;
+    
     @Override
     public java.util.Collection<? extends org.springframework.security.core.GrantedAuthority> getAuthorities() {
         // role이 Enum이면 아래처럼
         return java.util.List.of(() -> "ROLE_" + role.name());
+    }
+    
+    @Override
+    public boolean isEnabled() {
+        // status가 ACTIVE일 때만 활성화, 탈퇴 등은 비활성화 처리
+        return this.status == UserStatus.ACTIVE;
     }
 
     @Override
@@ -74,11 +86,6 @@ public class UserEntity implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
         return true;
     }
 

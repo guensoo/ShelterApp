@@ -21,8 +21,23 @@ public class BoardService {
     @Transactional
     public BoardResponseDTO createPost(BoardRequestDTO dto, String username) {
         Long maxPostNo = boardRepository.findMaxPostNo().orElse(0L);
+
+        // 1. BoardEntity 생성
         BoardEntity entity = dto.toEntity(username, maxPostNo + 1);
-        BoardEntity saved = boardRepository.save(entity);
+
+        // 2. 첨부파일 리스트 처리 (files가 null 또는 비어있으면 skip)
+        if (dto.getFiles() != null && !dto.getFiles().isEmpty()) {
+            for (BoardFileDTO fileDto : dto.getFiles()) {
+                BoardFileEntity fileEntity = BoardFileEntity.builder()
+                        .url(fileDto.getUrl())
+                        .originalFilename(fileDto.getOriginalFilename())
+                        .board(entity)
+                        .build();
+                entity.getFiles().add(fileEntity); // BoardEntity의 files에 추가
+            }
+        }
+
+        BoardEntity saved = boardRepository.save(entity); // cascade ALL이므로 파일도 함께 저장됨
         return BoardResponseDTO.fromEntity(saved);
     }
 
@@ -36,7 +51,7 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     public BoardResponseDTO getPostByPostNo(Long postNo) {
-        BoardEntity entity = boardRepository.findByPostNo(postNo)
+        BoardEntity entity = boardRepository.findByPostNoWithFiles(postNo)
                 .orElseThrow(() -> new RuntimeException("해당 게시글을 찾을 수 없습니다."));
         return BoardResponseDTO.fromEntity(entity);
     }

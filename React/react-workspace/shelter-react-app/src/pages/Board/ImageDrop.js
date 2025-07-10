@@ -11,23 +11,25 @@ const ImageDrop = ({ onFilesSelected }) => {
     };
 
     const onDrop = useCallback(async (acceptedFiles) => {
-        // 1. 미리보기 UI
         setPreviews(acceptedFiles.map(file => Object.assign(file, {
             preview: URL.createObjectURL(file)
         })));
 
-        // 2. 파일들 S3에 업로드 후 URL 받기
         try {
             const uploadPromises = acceptedFiles.map(file => uploadToS3(file));
             const uploadedUrls = await Promise.all(uploadPromises);
 
-            // 3. 상위 컴포넌트에 전달
-            onFilesSelected(uploadedUrls);
+            // URL과 파일명 같이 객체 배열로 만들기
+            const filesWithNames = uploadedUrls.map((url, idx) => ({
+                url,
+                originalFilename: acceptedFiles[idx].name,
+            }));
+
+            onFilesSelected(filesWithNames);
         } catch (err) {
             console.error("파일 업로드 중 오류:", err);
             alert("파일 업로드에 실패했습니다.");
         }
-
     }, [onFilesSelected]);
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({

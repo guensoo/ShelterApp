@@ -30,9 +30,7 @@ public class BoardController {
             @RequestBody BoardRequestDTO dto,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        System.out.println("✅ [DEBUG] userDetails = " + userDetails);
         if (userDetails != null) {
-            System.out.println("✅ [DEBUG] userDetails.getUsername() = " + userDetails.getUsername());
         }
 
         if (userDetails == null) {
@@ -52,13 +50,12 @@ public class BoardController {
 
     // 게시글 상세 조회
     @GetMapping("/{postNo}")
-    public ResponseEntity<BoardResponseDTO> getPostByPostNo(
-            @PathVariable("postNo") Long postNo
-    ) {
+    public ResponseEntity<BoardResponseDTO> getPostByPostNo(@PathVariable("postNo") Long postNo) {
         BoardResponseDTO post = boardService.getPostByPostNo(postNo);
-        return ResponseEntity.ok(post);
+        return ResponseEntity.ok()
+                .header("Cache-Control", "no-cache, no-store, must-revalidate")
+                .body(post);
     }
-    
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteBoard(

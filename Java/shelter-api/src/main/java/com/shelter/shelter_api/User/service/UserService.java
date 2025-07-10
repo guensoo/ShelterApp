@@ -7,8 +7,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.shelter.shelter_api.Board.Board.BoardRepository;
+import com.shelter.shelter_api.Board.Comment.CommentRepository;
 import com.shelter.shelter_api.Security.JwtProvider;
 import com.shelter.shelter_api.User.Role;
+import com.shelter.shelter_api.User.UserStatus;
 import com.shelter.shelter_api.User.dto.LoginRequest;
 import com.shelter.shelter_api.User.dto.SignupRequest;
 import com.shelter.shelter_api.User.entity.ResetTokenEntity;
@@ -27,6 +30,8 @@ public class UserService {
     private final JwtProvider jwtProvider; // JWT 유틸 클래스 (토큰 생성 담당)
     private final ResetTokenRepository resetTokenRepository;
     private final MailService mailService;
+    private final CommentRepository commentRepository;
+    private final BoardRepository boardRepository;
 
     // 회원가입
     public void signup(SignupRequest dto) {
@@ -42,6 +47,7 @@ public class UserService {
             .password(passwordEncoder.encode(dto.getPassword()))
             .nickname(dto.getNickname())
             .role(Role.USER)
+            .status(UserStatus.ACTIVE)
             .build();
         userRepository.save(user);
     }
@@ -97,5 +103,40 @@ public class UserService {
         userRepository.save(user);
         resetTokenRepository.delete(tokenEntity);
         return true;
+    }
+    
+    @Transactional
+    public void withdrawUser(String username) {
+        UserEntity user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("사용자 없음"));
+
+        user.setStatus(UserStatus.WITHDRAWN);
+        user.setNickname("탈퇴한 사용자");
+        userRepository.save(user);
+    }
+    
+    @Transactional
+    public void adminDeleteUserContent(String username) {
+        UserEntity user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        commentRepository.deleteAllByUser(user);       // 댓글 삭제
+        boardRepository.deleteAllByUsername(username); // 게시글 삭제 (username 기반)
+    }
+    
+    @Transactional
+    public void updateNickname(UserEntity user, String newNickname) {
+        user.setNickname(newNickname);
+        userRepository.save(user);
+    }
+    
+    @Transactional
+    public void changePassword(UserEntity user, String currentPassword, String newPassword) {
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
     }
 }

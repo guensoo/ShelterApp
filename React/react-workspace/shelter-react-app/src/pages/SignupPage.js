@@ -12,9 +12,12 @@ import { useAlert } from "../context/AlertContext";
 const idRegex = /^(?=.*[a-zA-Z])(?=.*\d)[a-zA-Z0-9]{5,16}$/;
 const pwRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*]).{8,20}$/;
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const nicknameRegex = /^[a-zA-Z0-9가-힣]{2,12}$/;
 
 const SignupPage = () => {
   const [userId, setUserId] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [nicknameError, setNicknameError] = useState(false);
   const [isValidId, setIsValidId] = useState(null);
   const [pw, setPw] = useState("");
   const [isValidPw, setIsValidPw] = useState(null);
@@ -29,6 +32,12 @@ const SignupPage = () => {
     const val = e.target.value;
     setEmail(val);
     setEmailError(val !== "" && !emailRegex.test(val));
+  };
+
+  const handleNicknameChange = (e) => {
+    const val = e.target.value;
+    setNickname(val);
+    setNicknameError(val !== "" && !nicknameRegex.test(val));
   };
 
   const handleIdChange = (e) => {
@@ -52,7 +61,7 @@ const SignupPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!(isValidId && isValidPw && pwMatch && !emailError && email)) return;
+    if (!(isValidId && !nicknameError && isValidPw && pwMatch && !emailError && email)) return;
 
     try {
       // username, nickname → userId로 전달
@@ -99,6 +108,16 @@ const SignupPage = () => {
                   <InputAdornment position="end"><CancelIcon color="error" /></InputAdornment>
                 ) : null
               }}
+            />
+            <TextField
+              label="닉네임"
+              value={nickname}
+              onChange={handleNicknameChange}
+              margin="dense"
+              fullWidth
+              required
+              error={nicknameError}
+              helperText={nicknameError ? "닉네임은 2~12자의 한글/영문/숫자만 가능합니다." : " "}
             />
             <TextField
               label="이메일"

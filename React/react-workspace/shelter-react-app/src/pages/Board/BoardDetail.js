@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Button, Divider, IconButton, Tooltip } from "@mui/material";
+import { TextField, Box, Typography, Paper, Button, Divider, IconButton, Tooltip } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
@@ -8,16 +8,17 @@ import { useState, useEffect } from 'react';
 import { useAlert } from '../../context/AlertContext';
 import { fetchBoardDetail } from '../../api/board'; // API 함수 import
 import { fetchScrapPosts, addScrapPost, removeScrapPost } from '../../api/user';
-import { getLikedStatus, likeBoardPost, reportBoardPost, deleteBoardPost, unlikeBoardPost } from '../../api/board';
+import { deleteComment, postComment, fetchComments, getLikedStatus, likeBoardPost, reportBoardPost, deleteBoardPost, unlikeBoardPost } from '../../api/board';
+import CommentSection from "./CommentSection";
 
 const BoardDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const postId = parseInt(id);
     const initialLikeCount = 0;
+    const [content, setContent] = useState('');
 
     const [post, setPost] = useState(null);
-    const [comments] = useState([]); // 댓글도 API 연동 필요하면 여기에 set
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -61,6 +62,7 @@ const BoardDetail = () => {
         const fetchData = async () => {
             try {
                 const data = await fetchBoardDetail(postId);
+                console.log('게시글 상세:', data);
                 setPost(data);
                 setLikeCount(data.likeCount ?? 0);
 
@@ -147,7 +149,7 @@ const BoardDetail = () => {
         }
     };
 
-    // 신고 클릭 (목업)
+    // 신고 클릭
     const handleReport = async () => {
         if (!loginUser) {
             await showAlert({ title: "로그인이 필요합니다", icon: "warning" });
@@ -163,6 +165,32 @@ const BoardDetail = () => {
             } else {
                 await showAlert({ title: "오류 발생", text: err.message, icon: "error" });
             }
+        }
+    };
+
+    const handlePostComment = async () => {
+        if (!content.trim()) {
+            alert('댓글 내용을 입력해주세요.');
+            return;
+        }
+        try {
+            // API 호출 예시: 댓글 등록
+            await postComment(postId, content); // postId는 현재 게시글 id 변수명
+            setContent('');
+            // 댓글 목록 다시 불러오기 또는 상태 업데이트
+            await fetchComments();
+        } catch (error) {
+            alert('댓글 등록에 실패했습니다.');
+        }
+    };
+
+    const handleDeleteComment = async (commentId) => {
+        if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
+        try {
+            await deleteComment(commentId);
+            await fetchComments();
+        } catch (error) {
+            alert('댓글 삭제에 실패했습니다.');
         }
     };
 
@@ -216,13 +244,28 @@ const BoardDetail = () => {
                         color: "#444"
                     }}
                 >
-                    <span>작성자: <b>{post.username}</b></span>
+                    <span>작성자: <b>{post.nickname}</b></span>
                     <span>| 추천: <b>{likeCount}</b></span>
                     <span>| 조회수: <b>{post.viewCount ?? 0}</b></span>
                 </Box>
 
                 <Box sx={{ mt: 2 }} dangerouslySetInnerHTML={{ __html: post.content }} />
-
+                {post && post.files && post.files.length > 0 && (
+                    <Box sx={{ mt: 2, mb: 2, display: "flex", gap: 2 }}>
+                        {post.files.map((file, idx) => (
+                            <Box
+                                key={idx}
+                                sx={{ border: '1px solid #eee', borderRadius: 2, overflow: 'hidden', maxWidth: 200 }}
+                            >
+                                <img
+                                    src={file.url}
+                                    alt={`첨부파일${idx + 1}`}
+                                    style={{ width: '100%', height: '100%', display: 'block' }}
+                                />
+                            </Box>
+                        ))}
+                    </Box>
+                )}
                 {/* 중앙 정렬: 추천/스크랩/신고 */}
                 <Box
                     sx={{
@@ -258,6 +301,33 @@ const BoardDetail = () => {
                     </Tooltip>
                 </Box>
 
+                {/* 첨부파일 이름 목록 */}
+                {post && post.files && post.files.length > 0 && (
+                    <Box sx={{ mt: 2, mb: 2 }}>
+                        <Box sx={{ fontWeight: 600, mb: 1 }}>첨부파일:</Box>
+                        <Box>
+                            {post.files.map((file, idx) => {
+                                const fileName = file.originalFilename || `첨부파일_${idx + 1}`;
+                                return (
+                                    <a
+                                        key={idx}
+                                        href={file.url}
+                                        download={fileName}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{ display: 'block', color: '#1976d2', textDecoration: 'underline', cursor: 'pointer', marginBottom: 4 }}
+                                        onClick={e => {
+                                            console.log('다운로드 시도:', file.url, fileName);
+                                        }}
+                                    >
+                                        {fileName}
+                                    </a>
+                                );
+                            })}
+                        </Box>
+                    </Box>
+                )}
+
                 {/* 우측 정렬: 목록/수정/삭제 */}
                 <Box
                     sx={{
@@ -272,7 +342,7 @@ const BoardDetail = () => {
                     </Button>
 
                     {(loginUser && (
-                        loginUser.username === post.username ||
+                        loginUser.nickname === post.nickname ||
                         loginUser.userId === 'admin' || // AuthContext 구조에 따라 다르게 세팅
                         loginUser.role === 'ADMIN'
                     )) && (
@@ -296,20 +366,7 @@ const BoardDetail = () => {
             </Paper>
 
             {/* 💬 댓글 영역 */}
-            <Box sx={{ mt: 5 }}>
-                <Typography variant="h6" gutterBottom>💬 댓글</Typography>
-                <Divider sx={{ mb: 2 }} />
-                {comments.length === 0 ? (
-                    <Typography>아직 댓글이 없습니다.</Typography>
-                ) : (
-                    comments.map((c) => (
-                        <Box key={c.id} sx={{ mb: 2, p: 1.5, border: "1px solid #eee", borderRadius: 1 }}>
-                            <Typography variant="subtitle2">{c.username} · {c.createdAt}</Typography>
-                            <Typography variant="body1">{c.content}</Typography>
-                        </Box>
-                    ))
-                )}
-            </Box>
+            <CommentSection boardId={postId} loginUser={loginUser} />
         </Box>
     );
 };

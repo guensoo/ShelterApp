@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.shelter.shelter_api.User.entity.UserEntity;
 
@@ -24,7 +25,10 @@ public class BoardLikeController {
 
     // 추천 여부 체크 API 추가
     @GetMapping("/{boardId}/liked")
-    public ResponseEntity<?> isLiked(@PathVariable("boardId") Long boardId, @AuthenticationPrincipal UserEntity user) {
+    public ResponseEntity<?> isLiked(@PathVariable("boardId") Long boardId, @AuthenticationPrincipal UserDetails user) {
+        if (user == null) {
+            return ResponseEntity.status(403).body(Map.of("message", "로그인 필요"));
+        }
         boolean liked = boardLikeService.isLiked(boardId, user.getUsername());
         return ResponseEntity.ok(Map.of("liked", liked));
     }

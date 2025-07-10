@@ -2,20 +2,31 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Box, Typography, List, ListItem, ListItemText, Divider, Paper,
-    Button, CircularProgress
+    Button, CircularProgress, Dialog, DialogTitle, DialogContent,
+    DialogActions, TextField,
 } from "@mui/material";
 import { useAlert } from "../context/AlertContext";
 import { useAuth } from "../context/AuthContext";
-import { deleteUser, fetchScrapPosts, removeScrapPost } from "../api/user";
+import { changePassword, deleteUser, fetchScrapPosts, removeScrapPost, updateNickname } from "../api/user";
 
 const MyPage = () => {
     const navigate = useNavigate();
     const { loginUser, isLoggedIn, isLoading, logout } = useAuth(); // 👈 context 사용
     const [favoriteShelters] = useState([]);
     const [scrapPosts, setScrapPosts] = useState([]);
+
+    // 알람
     const { showAlert, showToast } = useAlert();
     const [isWithdrawing, setIsWithdrawing] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    // 회원정보수정
+    const [openEditDialog, setOpenEditDialog] = useState(false);
+    const [nickname, setNickname] = useState(loginUser?.nickname || "");
+    const [selected, setSelected] = useState("nickname");
+    const [currentPw, setCurrentPw] = useState("");
+    const [newPw, setNewPw] = useState("");
+    const [newPwConfirm, setNewPwConfirm] = useState("");
 
 
     const handleWithdraw = async () => {
@@ -96,8 +107,27 @@ const MyPage = () => {
 
     if (isLoading || !isLoggedIn || !loginUser || isWithdrawing) return null;
 
+    const handleProfileEdit = () => {
+        setOpenEditDialog(true);
+    };
+
+    const handleEditClose = () => {
+        setOpenEditDialog(false);
+    };
+
+    const handleSaveNickname = async () => {
+        try {
+            await updateNickname(nickname); // API 연동 함수 따로 정의해야 함
+            await showAlert({ title: "닉네임이 수정되었습니다.", icon: "success" });
+            setOpenEditDialog(false);
+            // TODO: 사용자 상태 갱신 필요 시 추가
+        } catch (err) {
+            await showAlert({ title: "수정 실패", icon: "error" });
+        }
+    };
+
     // 탈퇴 확인 팝업 띄우고 확인 시 실제 탈퇴 처리 호출
-    const confirmWithdraw = () => {
+    const handleDeleteUser = () => {
         showAlert({
             title: "탈퇴하시겠습니까?",
             text: "모든 데이터가 즉시 삭제되며 복구할 수 없습니다.",
@@ -112,6 +142,46 @@ const MyPage = () => {
         });
     };
 
+    // 비밀번호 변경 함수
+    const handleChangePassword = async () => {
+        if (!currentPw || !newPw || !newPwConfirm) {
+            await showAlert({ title: "모든 항목을 입력해주세요.", icon: "warning" });
+            return;
+        }
+
+        if (newPw !== newPwConfirm) {
+            await showAlert({ title: "새 비밀번호가 일치하지 않습니다.", icon: "error" });
+            return;
+        }
+
+        try {
+            await changePassword({ currentPassword: currentPw, newPassword: newPw });
+            await showAlert({ title: "비밀번호가 변경되었습니다.", icon: "success" });
+
+            setCurrentPw("");
+            setNewPw("");
+            setNewPwConfirm("");
+            setSelected("nickname");
+        } catch (err) {
+            await showAlert({ title: "변경 실패", text: err, icon: "error" }); // ✅ 문자열 그대로
+        }
+    };
+
+    // 닉네임 변경 함수
+    const handleUpdateNickname = async () => {
+        if (!nickname.trim()) {
+            await showAlert({ title: "닉네임을 입력해주세요.", icon: "warning" });
+            return;
+        }
+
+        try {
+            await updateNickname(nickname);
+            await showAlert({ title: "닉네임이 변경되었습니다.", icon: "success" });
+            setOpenEditDialog(false);
+        } catch (err) {
+            await showAlert({ title: "변경 실패", text: err, icon: "error" }); // 👈 그대로
+        }
+    };
 
     return (
         <Box
@@ -223,18 +293,130 @@ const MyPage = () => {
                 )}
             </Paper>
 
-            {/* 🚩 회원탈퇴 버튼(맨 아래) */}
-            <Box sx={{ width: "100%", maxWidth: 500, mt: 5 }}>
-                <Divider sx={{ my: 3 }} />
+            {/* 🚩 회원정보수정, 회원탈퇴 버튼(맨 아래) */}
+            <Box sx={{ display: "flex", gap: 2, mt: 4 }}>
                 <Button
                     variant="outlined"
-                    color="error"
-                    fullWidth
-                    onClick={confirmWithdraw}  // 여기만 바꿔주세요
+                    color="primary"
+                    sx={{ flex: 1 }}
+                    onClick={handleProfileEdit} // 회원정보수정 페이지로 이동 또는 다이얼로그 열기
                 >
-                    회원탈퇴
+                    회원정보수정
                 </Button>
             </Box>
+            <Dialog open={openEditDialog} onClose={handleEditClose} fullWidth maxWidth="sm" sx={{ zIndex: 1000 }}>
+                <DialogTitle>회원정보 관리</DialogTitle>
+                <DialogContent dividers>
+                    {/* 상단 기능 선택 버튼 */}
+                    <Box sx={{ display: "flex", gap: 1, mb: 3 }}>
+                        <Button
+                            variant={selected === "nickname" ? "contained" : "outlined"}
+                            onClick={() => setSelected("nickname")}
+                        >
+                            닉네임 변경
+                        </Button>
+                        <Button
+                            variant={selected === "password" ? "contained" : "outlined"}
+                            onClick={() => setSelected("password")}
+                        >
+                            비밀번호 변경
+                        </Button>
+                        <Button
+                            variant={selected === "withdraw" ? "contained" : "outlined"}
+                            color="error"
+                            onClick={() => setSelected("withdraw")}
+                        >
+                            회원 탈퇴
+                        </Button>
+                    </Box>
+
+                    {/* 본문 내용 영역 */}
+                    {selected === "nickname" && (
+                        <>
+                            <TextField
+                                margin="dense"
+                                label="아이디"
+                                fullWidth
+                                variant="standard"
+                                value={loginUser?.username || ""}
+                                InputProps={{ readOnly: true }}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="이메일"
+                                fullWidth
+                                variant="standard"
+                                value={loginUser?.email || ""}
+                                InputProps={{ readOnly: true }}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="닉네임"
+                                fullWidth
+                                variant="standard"
+                                value={nickname}
+                                onChange={(e) => setNickname(e.target.value)}
+                            />
+                        </>
+                    )}
+
+                    {selected === "password" && (
+                        <>
+                            <TextField
+                                margin="dense"
+                                label="현재 비밀번호"
+                                type="password"
+                                fullWidth
+                                variant="standard"
+                                value={currentPw}
+                                onChange={(e) => setCurrentPw(e.target.value)}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="새 비밀번호"
+                                type="password"
+                                fullWidth
+                                variant="standard"
+                                value={newPw}
+                                onChange={(e) => setNewPw(e.target.value)}
+                            />
+                            <TextField
+                                margin="dense"
+                                label="새 비밀번호 확인"
+                                type="password"
+                                fullWidth
+                                variant="standard"
+                                value={newPwConfirm}
+                                onChange={(e) => setNewPwConfirm(e.target.value)}
+                            />
+                        </>
+                    )}
+
+                    {selected === "withdraw" && (
+                        <Box sx={{ mt: 2 }}>
+                            <Typography color="error" sx={{ mb: 1 }}>
+                                정말 탈퇴하시겠습니까?
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                                탈퇴 시 모든 데이터가 삭제되며 복구가 불가능합니다.
+                            </Typography>
+                        </Box>
+                    )}
+                </DialogContent>
+
+                <DialogActions>
+                    <Button onClick={handleEditClose} color="inherit">취소</Button>
+                    {selected === "nickname" && (
+                        <Button onClick={handleSaveNickname} color="primary" variant="contained">저장</Button>
+                    )}
+                    {selected === "password" && (
+                        <Button onClick={handleChangePassword} color="primary" variant="contained">변경</Button>
+                    )}
+                    {selected === "withdraw" && (
+                        <Button onClick={handleDeleteUser} color="error" variant="contained">회원 탈퇴</Button>
+                    )}
+                </DialogActions>
+            </Dialog>
         </Box >
     );
 };

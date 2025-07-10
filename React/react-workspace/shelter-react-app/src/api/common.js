@@ -30,15 +30,42 @@ const noAuthPrefix = [
   '/shelters'
 ];
 
-// board/{id}, shelters/**는 startsWith로 처리!
 API.interceptors.request.use(config => {
-  const isExact = noAuthExact.includes(config.url);
-  const isPrefix = noAuthPrefix.some(path => config.url === path || config.url.startsWith(path + '/'));
+  const path = new URL(config.url, config.baseURL).pathname;
+  const noAuthExact = [
+    '/user/login',
+    '/user/signup',
+    '/user/find-id',
+    '/user/send-reset-link',
+    '/user/reset-password',
+    '/board'
+  ];
+  const noAuthPrefix = ['/shelters'];
+
+  const isExact = noAuthExact.includes(path);
+  const isPrefix = noAuthPrefix.some(prefix => path.startsWith(prefix));
+
   if (!isExact && !isPrefix) {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
   }
+
   return config;
 });
+
+API.interceptors.response.use(
+  response => response,
+  error => {
+    const status = error.response?.status;
+
+    if (status === 401) {
+      localStorage.removeItem("token");
+      alert("세션이 만료되었습니다. 다시 로그인해 주세요.");
+      window.location.href = "/login";
+    }
+
+    return Promise.reject(error);
+  }
+);

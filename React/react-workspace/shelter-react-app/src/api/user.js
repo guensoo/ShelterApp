@@ -72,14 +72,20 @@ export const resetPassword = async (token, newPassword) => {
   }
 };
 
-export const fetchScrapPosts = async (username) => {
+export const fetchScrapPosts = async () => {
   try {
-    const res = await API.get(`/user/scraps?userId=${username}`);
+    const token = localStorage.getItem('token');
+    const res = await API.get('/user/scraps', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
     return res.data;
   } catch (err) {
     throw err.response?.data?.message || err.message || '스크랩 조회 실패';
   }
 };
+
 
 export const addScrapPost = async (boardId) => {
   try {
@@ -96,5 +102,23 @@ export const removeScrapPost = async (boardId) => {
     return res.data;
   } catch (err) {
     throw err.response?.data?.message || err.message || '스크랩 삭제 실패';
+  }
+};
+
+export const updateNickname = async (nickname) => {
+  try {
+    const res = await API.put("/user/nickname", { nickname });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data?.message || err.message || "닉네임 변경 실패";
+  }
+};
+
+export const changePassword = async ({ currentPassword, newPassword }) => {
+  try {
+    const res = await API.patch("/user/password", { currentPassword, newPassword });
+    return res.data;
+  } catch (err) {
+    throw err.response?.data?.message || err.message || "비밀번호 변경 실패";
   }
 };

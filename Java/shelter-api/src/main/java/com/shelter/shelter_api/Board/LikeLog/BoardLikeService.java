@@ -40,8 +40,8 @@ public class BoardLikeService {
 
     // 추천 여부 조회 추가
     @Transactional(readOnly = true)
-    public boolean isLiked(Long boardId, String username) {
-        BoardEntity board = boardRepository.findById(boardId)
+    public boolean isLiked(Long postNo, String username) {
+        BoardEntity board = boardRepository.findByPostNo(postNo)
             .orElseThrow(() -> new RuntimeException("해당 게시글이 없습니다."));
         return boardLikeLogRepository.existsByBoardAndUsername(board, username);
     }
