@@ -9,8 +9,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 public class ShelterApiApplication {
 
 	public static void main(String[] args) {
-
-		SpringApplication.run(ShelterApiApplication.class, args);
+	    SpringApplication app = new SpringApplication(ShelterApiApplication.class);
+//	    app.setAdditionalProfiles("dev"); // 배포시 주석처리
+//	    app.run(args);
 	}
 
 }

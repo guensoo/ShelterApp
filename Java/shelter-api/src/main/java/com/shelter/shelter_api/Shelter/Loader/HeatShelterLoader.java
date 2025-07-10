@@ -1,5 +1,8 @@
 package com.shelter.shelter_api.Shelter.Loader;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -37,11 +40,12 @@ public class HeatShelterLoader {
         ObjectMapper objectMapper = new ObjectMapper();
 
         do {
-            String url = "https://www.safetydata.go.kr/V2/api/DSSP-IF-10942"
-                    + "?serviceKey=" + serviceKey
-                    + "&pageNo=" + pageNo
-                    + "&numOfRows=" + numOfRows
-                    + "&returnType=json";
+        	String encodedKey = URLEncoder.encode(serviceKey, StandardCharsets.UTF_8.toString());
+        	String url = "https://www.safetydata.go.kr/V2/api/DSSP-IF-10942"
+        	    + "?serviceKey=" + encodedKey
+        	    + "&pageNo=" + pageNo
+        	    + "&numOfRows=" + numOfRows
+        	    + "&returnType=json";
             String result = restTemplate.getForObject(url, String.class);
             JsonNode root = objectMapper.readTree(result);
 

@@ -1,31 +1,46 @@
 import { API } from './common';
 
-// 무더위쉼터
 export const fetchHeatShelters = async () => {
-  const res = await API.get('/shelters/heat');
-  return res.data.map(d => ({ ...d, type: 'HEAT' }));
+  try {
+    const res = await API.get('/shelters/heat');
+    return res.data.map(d => ({ ...d, type: 'HEAT' }));
+  } catch (err) {
+    throw err.response?.data?.message || err.message || '무더위쉼터 조회 실패';
+  }
 };
 
-// 한파쉼터
 export const fetchColdShelters = async () => {
-  const res = await API.get('/shelters/cold');
-  return res.data.map(d => ({ ...d, type: 'COLD' }));
+  try {
+    const res = await API.get('/shelters/cold');
+    return res.data.map(d => ({ ...d, type: 'COLD' }));
+  } catch (err) {
+    throw err.response?.data?.message || err.message || '한파쉼터 조회 실패';
+  }
 };
 
-// 화학대피소
 export const fetchChemicalShelters = async () => {
-  const res = await API.get('/shelters/chemical');
-  return res.data.map(d => ({ ...d, type: 'CHEMICAL' }));
+  try {
+    const res = await API.get('/shelters/chemical');
+    return res.data.map(d => ({ ...d, type: 'CHEMICAL' }));
+  } catch (err) {
+    throw err.response?.data?.message || err.message || '화학대피소 조회 실패';
+  }
 };
 
-// 민방위대피소
 export const fetchCivilDefenseShelters = async () => {
-  const res = await API.get('/shelters/defense');
-  return res.data.map(d => ({ ...d, type: 'CIVIL_DEFENSE' }));
+  try {
+    const res = await API.get('/shelters/defense');
+    return res.data.map(d => ({ ...d, type: 'CIVIL_DEFENSE' }));
+  } catch (err) {
+    throw err.response?.data?.message || err.message || '민방위대피소 조회 실패';
+  }
 };
 
-// 지진/해일대피소
 export const fetchEarthquakeShelters = async () => {
-  const res = await API.get('/shelters/earthquake');
-  return res.data.map(d => ({ ...d, type: 'EARTHQUAKE' }));
+  try {
+    const res = await API.get('/shelters/earthquake');
+    return res.data.map(d => ({ ...d, type: 'EARTHQUAKE' }));
+  } catch (err) {
+    throw err.response?.data?.message || err.message || '지진/해일대피소 조회 실패';
+  }
 };
