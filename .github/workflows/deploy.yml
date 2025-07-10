@@ -13,12 +13,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          distribution: 'corretto'
+          java-version: '17'
+
       # ✅ 백엔드 빌드 (Java)
       - name: Set up JDK 17
-        uses: actions/setup-java@v3
-        with:
-          java-version: '17'
-          distribution: 'temurin'
 
       - name: Give execute permission to gradlew
         working-directory: ./Java/shelter-api
@@ -42,7 +44,7 @@ jobs:
           API_DEFENSE_KEY: ${{ secrets.API_DEFENSE_KEY }}
 
       # ✅ 프론트엔드 빌드 (React)
-      - name: Set up Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
