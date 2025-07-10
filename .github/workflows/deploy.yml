@@ -26,7 +26,7 @@ jobs:
 
       - name: Build Spring Boot Project
         working-directory: ./Java/shelter-api
-        run: ./gradlew clean build -x test
+        run: ./gradlew clean build
         env:
           DB_URL: ${{ secrets.DB_URL }}
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
