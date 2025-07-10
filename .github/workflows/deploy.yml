@@ -76,7 +76,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: "Java/shelter-api/build/libs/*.jar"
-          target: "~/app"
+          target: "~/app/Java/shelter-api/build/libs"
 
       # ✅ EC2에서 서버 재시작 (이게 핵심!)
       - name: Restart backend on EC2
@@ -89,6 +89,6 @@ jobs:
           script: |
             pkill -f 'java -jar' || true
             sleep 10
-            cd ~/app
-            nohup java -jar *.jar > log.txt 2>&1 & disown
+            cd ~/app/Java/shelter-api/build/libs
+            nohup java -jar shelter-api-0.0.1-SNAPSHOT.jar > ~/app/log.txt 2>&1 & disown
             exit 0
