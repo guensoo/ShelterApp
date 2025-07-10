@@ -87,6 +87,11 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           timeout: 600s
           script: |
-              bash ~/deploy.sh
-              exit 0
+            # 기존 프로세스 종료
+            pkill -f 'java -jar' || true
+            sleep 10
+
+            # 최신 .jar 실행
+            cd ~/app/Java/shelter-api/build/libs
+            nohup java -jar *.jar > ~/app/log.txt 2>&1 &
       
