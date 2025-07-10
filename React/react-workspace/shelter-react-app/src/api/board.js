@@ -75,7 +75,8 @@ export const reportBoardPost = async ({ boardId, reason }) => {
     const res = await API.post('/api/report', { boardId, reason });
     return res.data;
   } catch (err) {
-    throw err.response?.data?.message || err.message || '신고 실패';
+    // 전체 에러 객체를 throw (분기 처리를 위해)
+    throw err;
   }
 };
 

@@ -18,15 +18,15 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class HeatShelterLoader {
-    @PostConstruct
-    public void init() {
-    	System.out.println("==== HeatShelterLoader init 실행 ====");
-        try {
-            loadHeatShelters();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    @PostConstruct
+//    public void init() {
+//    	System.out.println("==== HeatShelterLoader init 실행 ====");
+//        try {
+//            loadHeatShelters();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private final HeatShelterRepository repository;
 

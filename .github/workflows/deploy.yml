@@ -47,6 +47,12 @@ jobs:
         with:
           node-version: '18'
 
+      - name: Create .env file for React
+        working-directory: ./React/react-workspace/shelter-react-app
+        run: |
+          echo "REACT_APP_NAVER_MAP_CLIENT_ID=${{ secrets.REACT_APP_NAVER_MAP_CLIENT_ID }}" > .env
+          echo "REACT_APP_NAVER_MAP_CLIENT_SECRET=${{ secrets.REACT_APP_NAVER_MAP_CLIENT_SECRET }}" >> .env
+
       - name: Build React App
         working-directory: ./React/react-workspace/shelter-react-app
         run: |

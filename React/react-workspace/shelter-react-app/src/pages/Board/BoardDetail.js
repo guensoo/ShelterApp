@@ -154,11 +154,15 @@ const BoardDetail = () => {
             return;
         }
         try {
-            // reason(신고 사유)는 직접 입력받을 수도 있음 (지금은 "부적절한 내용" 하드코딩 예시)
             await reportBoardPost({ boardId: postId, reason: "부적절한 내용" });
             await showAlert({ title: "🚨 신고가 접수되었습니다.", icon: "success" });
         } catch (err) {
-            await showAlert({ title: "오류 발생", text: err.message, icon: "error" });
+            // 409 Conflict 처리
+            if (err.response?.status === 409) {
+                await showAlert({ title: "이미 신고하셨습니다.", icon: "info" });
+            } else {
+                await showAlert({ title: "오류 발생", text: err.message, icon: "error" });
+            }
         }
     };
 

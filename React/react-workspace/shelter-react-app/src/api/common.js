@@ -18,22 +18,23 @@ export const API = axios.create({
 });
 
 // 토큰이 필요 없는 엔드포인트 목록
-const noAuthPaths = [
+const noAuthExact = [
   '/user/login',
   '/user/signup',
   '/user/find-id',
   '/user/send-reset-link',
   '/user/reset-password',
-  '/shelters',
-  '/board'
+  '/board', // 이거만!
+];
+const noAuthPrefix = [
+  '/shelters'
 ];
 
 // board/{id}, shelters/**는 startsWith로 처리!
 API.interceptors.request.use(config => {
-  const noAuth = noAuthPaths.some(path =>
-    config.url === path || config.url.startsWith(path + '/')
-  );
-  if (!noAuth) {
+  const isExact = noAuthExact.includes(config.url);
+  const isPrefix = noAuthPrefix.some(path => config.url === path || config.url.startsWith(path + '/'));
+  if (!isExact && !isPrefix) {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
