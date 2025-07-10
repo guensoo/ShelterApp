@@ -89,6 +89,6 @@ jobs:
           script: |
             pkill -f 'java -jar' || true
             sleep 10
-            cd ~/app/Java/shelter-api/build/libs
-            nohup java -jar *.jar > ~/app/log.txt 2>&1 & disown
+            cd ~/app
+            nohup java -jar *.jar > log.txt 2>&1 & disown
             exit 0
