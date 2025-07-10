@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import { fetchComments, postComment, deleteComment, updateComment } from "../../api/board"; // API 함수
 import { useAlert } from "../../context/AlertContext";
@@ -13,7 +13,7 @@ const CommentSection = ({ boardId, loginUser }) => {
 
 
     // 댓글 목록 불러오기
-    const loadComments = async () => {
+    const loadComments = useCallback(async () => {
         setLoading(true);
         try {
             const data = await fetchComments(boardId);
@@ -23,12 +23,11 @@ const CommentSection = ({ boardId, loginUser }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [boardId]);  // boardId가 바뀔 때만 함수 새로 만듦
 
     useEffect(() => {
         loadComments();
-        console.log("loginUser", loginUser);
-    }, [boardId]);
+    }, [loadComments]);  // 이제 의존성 배열에 loadComments만 있어도 됨
 
     // 댓글 등록
     const handlePostComment = async () => {

@@ -167,22 +167,6 @@ const MyPage = () => {
         }
     };
 
-    // 닉네임 변경 함수
-    const handleUpdateNickname = async () => {
-        if (!nickname.trim()) {
-            await showAlert({ title: "닉네임을 입력해주세요.", icon: "warning" });
-            return;
-        }
-
-        try {
-            await updateNickname(nickname);
-            await showAlert({ title: "닉네임이 변경되었습니다.", icon: "success" });
-            setOpenEditDialog(false);
-        } catch (err) {
-            await showAlert({ title: "변경 실패", text: err, icon: "error" }); // 👈 그대로
-        }
-    };
-
     return (
         <Box
             sx={{

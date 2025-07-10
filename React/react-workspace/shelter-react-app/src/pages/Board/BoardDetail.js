@@ -1,4 +1,4 @@
-import { TextField, Box, Typography, Paper, Button, Divider, IconButton, Tooltip } from "@mui/material";
+import { Box, Typography, Paper, Button, IconButton, Tooltip } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import ThumbUpAltIcon from '@mui/icons-material/ThumbUpAlt';
 import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { useAlert } from '../../context/AlertContext';
 import { fetchBoardDetail } from '../../api/board'; // API 함수 import
 import { fetchScrapPosts, addScrapPost, removeScrapPost } from '../../api/user';
-import { deleteComment, postComment, fetchComments, getLikedStatus, likeBoardPost, reportBoardPost, deleteBoardPost, unlikeBoardPost } from '../../api/board';
+import { getLikedStatus, likeBoardPost, reportBoardPost, deleteBoardPost, unlikeBoardPost } from '../../api/board';
 import CommentSection from "./CommentSection";
 
 const BoardDetail = () => {
@@ -16,7 +16,6 @@ const BoardDetail = () => {
     const navigate = useNavigate();
     const postId = parseInt(id);
     const initialLikeCount = 0;
-    const [content, setContent] = useState('');
 
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -165,32 +164,6 @@ const BoardDetail = () => {
             } else {
                 await showAlert({ title: "오류 발생", text: err.message, icon: "error" });
             }
-        }
-    };
-
-    const handlePostComment = async () => {
-        if (!content.trim()) {
-            alert('댓글 내용을 입력해주세요.');
-            return;
-        }
-        try {
-            // API 호출 예시: 댓글 등록
-            await postComment(postId, content); // postId는 현재 게시글 id 변수명
-            setContent('');
-            // 댓글 목록 다시 불러오기 또는 상태 업데이트
-            await fetchComments();
-        } catch (error) {
-            alert('댓글 등록에 실패했습니다.');
-        }
-    };
-
-    const handleDeleteComment = async (commentId) => {
-        if (!window.confirm('댓글을 삭제하시겠습니까?')) return;
-        try {
-            await deleteComment(commentId);
-            await fetchComments();
-        } catch (error) {
-            alert('댓글 삭제에 실패했습니다.');
         }
     };
 

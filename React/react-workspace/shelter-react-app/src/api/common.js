@@ -18,17 +18,6 @@ export const API = axios.create({
 });
 
 // 토큰이 필요 없는 엔드포인트 목록
-const noAuthExact = [
-  '/user/login',
-  '/user/signup',
-  '/user/find-id',
-  '/user/send-reset-link',
-  '/user/reset-password',
-  '/board', // 이거만!
-];
-const noAuthPrefix = [
-  '/shelters'
-];
 
 API.interceptors.request.use(config => {
   const path = new URL(config.url, config.baseURL).pathname;
