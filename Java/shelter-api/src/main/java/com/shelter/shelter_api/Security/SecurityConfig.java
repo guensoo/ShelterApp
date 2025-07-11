@@ -51,31 +51,30 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .httpBasic(httpBasic -> httpBasic.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                		.requestMatchers("/actuator/health").permitAll()
-                        .requestMatchers(
-                        		"/shelters/**",
-                                "/user/signup",
-                                "/user/login",
-                                "/shelters/**",
-                                "/board",
-                                "/board/{boardId}",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/v/api-docs/**"
-                        ).permitAll()
-                        .requestMatchers("/report/**").authenticated()
-                        .requestMatchers("/board/write", "/board/{boardId}/liked", "/board/{boardId}/unliked", "/board/report", "/api/files/upload").authenticated()
-                        .requestMatchers("/user/scraps", "/user/scraps/**").authenticated()
-                        .requestMatchers("/comments").authenticated()
-                        .requestMatchers("/report/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class);
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .httpBasic(httpBasic -> httpBasic.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/actuator/health").permitAll()
+                .requestMatchers(
+                    "/shelters/**",
+                    "/user/signup",
+                    "/user/login",
+                    "/board",
+                    "/board/{boardId}",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v/api-docs/**"
+                ).permitAll()
+                .requestMatchers("/report/**").authenticated()
+                .requestMatchers("/board/write", "/board/{boardId}/liked", "/board/{boardId}/unliked", "/board/report", "/api/files/upload").authenticated()
+                .requestMatchers("/user/scraps", "/user/scraps/**").authenticated()
+                .requestMatchers("/comments").authenticated()
+                .requestMatchers("/report/admin/**").hasRole("ADMIN")
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
