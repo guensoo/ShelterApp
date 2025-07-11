@@ -62,13 +62,13 @@ public class SecurityConfig {
                     "/user/signup",
                     "/user/login",
                     "/board",
-                    "/board/{boardId}",
+                    "/board/*",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
-                    "/v/api-docs/**"
+                    "/v3/api-docs/**"
                 ).permitAll()
                 .requestMatchers("/report/**").authenticated()
-                .requestMatchers("/board/write", "/board/{boardId}/liked", "/board/{boardId}/unliked", "/board/report", "/api/files/upload").authenticated()
+                .requestMatchers("/board/write", "/board/*/liked", "/board/*/unliked", "/board/report", "/api/files/upload").authenticated()
                 .requestMatchers("/user/scraps", "/user/scraps/**").authenticated()
                 .requestMatchers("/comments").authenticated()
                 .requestMatchers("/report/admin/**").hasRole("ADMIN")

@@ -2,6 +2,12 @@ server:
   port: 5000
   address: 0.0.0.0
 
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
 spring:
   datasource:
     url: jdbc:mysql://shelter-database.cdcoeg0wokyc.ap-northeast-2.rds.amazonaws.com:3306/shelter?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
@@ -62,7 +68,7 @@ api:
 
 springdoc:
  api-docs:
-  path: /v/api-docs
+  path: /v3/api-docs
   #OpenAPI 명세가 노출되는 경로 설정
   #기본값은 /v3/api/docs
   #브라우저에서 확인가능하다 : http://localhost:포트/v3/api-docs
