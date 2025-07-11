@@ -108,7 +108,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: ".env"
-          target: "~/app/Java/shelter-api/.env"
+          target: "~/app/Java/shelter-api/"
 
       # ✅ EC2에서 서버 재시작 (systemd 서비스 사용)
       - name: Restart backend service on EC2
