@@ -33,12 +33,17 @@ import com.shelter.shelter_api.User.repository.UserRepository;
 import com.shelter.shelter_api.User.service.UserService;
 import com.shelter.shelter_api.jwt.JwtTokenResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
+@Tag(name = "회원/계정 API", description = "회원가입, 로그인, 내정보, 탈퇴, 아이디/비번 찾기 등")
 public class UserController {
 
     private final UserRepository userRepository;
@@ -46,6 +51,8 @@ public class UserController {
     private final JwtProvider jwtProvider;
     private final UserService userService;
 
+    @Operation(summary = "회원가입", description = "신규 회원 가입")
+    @ApiResponse(responseCode = "200", description = "회원가입 성공")
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
@@ -67,6 +74,11 @@ public class UserController {
         return ResponseEntity.ok("회원가입이 완료되었습니다.");
     }
 
+    @Operation(summary = "로그인", description = "아이디/비밀번호로 로그인 후 JWT 토큰 반환")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "로그인 성공(JWT 반환)"),
+        @ApiResponse(responseCode = "401", description = "아이디/비밀번호 불일치")
+    })
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         UserEntity user = userRepository.findByUsername(loginRequest.getUsername())
@@ -80,6 +92,12 @@ public class UserController {
         return ResponseEntity.ok(new JwtTokenResponse(token));
     }
 
+    @Operation(summary = "내 정보 조회", description = "JWT 토큰 기반 내 정보(UserDTO) 반환")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "조회 성공"),
+        @ApiResponse(responseCode = "401", description = "유효하지 않은 토큰"),
+        @ApiResponse(responseCode = "404", description = "사용자 없음")
+    })
     @GetMapping("/me")
     public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
         String token = jwtProvider.resolveToken(request);
@@ -103,12 +121,19 @@ public class UserController {
         return ResponseEntity.ok(userDTO);
     }
     
+    @Operation(summary = "회원 탈퇴", description = "로그인한 사용자의 계정 탈퇴")
+    @ApiResponse(responseCode = "200", description = "회원 탈퇴 완료")
     @DeleteMapping("/delete")
     public ResponseEntity<?> withdraw(@AuthenticationPrincipal UserDetails userDetails) {
         userService.withdrawUser(userDetails.getUsername());
         return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
     
+    @Operation(summary = "[관리자] 유저의 게시글+댓글 전체 삭제", description = "관리자가 특정 유저의 게시글+댓글 일괄 삭제")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "삭제 완료"),
+        @ApiResponse(responseCode = "403", description = "권한 없음")
+    })
     @DeleteMapping("/admin/delete-content/{username}")
     @PreAuthorize("hasRole('ADMIN')") // 이거 있으면 권한 체크됨
     public ResponseEntity<?> deleteUserContent(@PathVariable String username) {
@@ -117,6 +142,7 @@ public class UserController {
     }
     
     // 1. 아이디 찾기
+    @Operation(summary = "아이디 찾기", description = "이메일로 가입된 아이디(아이디 찾기)")
     @PostMapping("/find-id")
     public ResponseEntity<?> findUserId(@RequestBody FindIdRequest request) {
         String username = userService.findUserIdByEmail(request.getEmail());
@@ -126,6 +152,7 @@ public class UserController {
     }
 
     // 2. 비밀번호 재설정 링크 이메일 발송
+    @Operation(summary = "비밀번호 재설정 링크 이메일 발송", description = "비밀번호 재설정 링크를 메일로 발송")
     @PostMapping("/send-reset-link")
     public ResponseEntity<?> sendResetLink(@RequestBody ResetLinkRequest request) {
         String token = userService.createAndSendResetToken(request.getUsername(), request.getEmail());
@@ -134,6 +161,7 @@ public class UserController {
     }
 
     // 3. 비밀번호 재설정(토큰으로)
+    @Operation(summary = "비밀번호 재설정", description = "토큰을 통한 비밀번호 재설정")
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest request) {
         boolean ok = userService.updatePasswordByToken(request.getToken(), request.getNewPassword());
@@ -141,7 +169,7 @@ public class UserController {
         return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
     }
     
-
+    @Operation(summary = "닉네임 변경", description = "로그인 사용자의 닉네임 변경")
     @PutMapping("/nickname")
     public ResponseEntity<?> updateNickname(@RequestBody UpdateNicknameRequest dto,
                                             @AuthenticationPrincipal UserEntity user) {
@@ -149,6 +177,7 @@ public class UserController {
         return ResponseEntity.ok().body(Map.of("message", "닉네임 변경 완료"));
     }
 
+    @Operation(summary = "비밀번호 변경", description = "로그인 사용자의 비밀번호 변경")
     @PatchMapping("/password")
     public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest dto,
                                             @AuthenticationPrincipal UserEntity user) {

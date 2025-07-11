@@ -3,10 +3,10 @@ server:
 
 spring:
   datasource:
-    url: ${DB_URL}
+    url: jdbc:mysql://shelter-database.cdcoeg0wokyc.ap-northeast-2.rds.amazonaws.com:3306/shelter?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    username: admin
+    password: Test1234!
 
   jpa:
     hibernate:
@@ -25,8 +25,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
+    username: chgs9079@gmail.com
+    password: dclrujvsuitxbnmt
     properties:
       mail:
         smtp:
@@ -48,12 +48,24 @@ s3:
 
 api:
   earthquake:
-    service-key: ${API_EARTHQUAKE_KEY}
+    service-key: XANX2VH136BJA564
   chemical:
-    service-key: ${API_CHEMICAL_KEY}
+    service-key: 221O0952RC4482PC
   heat:
-    service-key: ${API_HEAT_KEY}
+    service-key: 37000OM9879729A4
   cold:
-    service-key: ${API_COLD_KEY}
+    service-key: 7TH2H36WY8VW30FM
   defense:
-    service-key: ${API_DEFENSE_KEY}
+    service-key: HJWQIDG3KD670YGI
+
+springdoc:
+ api-docs:
+  path: /v/api-docs
+  #OpenAPI 명세가 노출되는 경로 설정
+  #기본값은 /v3/api/docs
+  #브라우저에서 확인가능하다 : http://localhost:포트/v3/api-docs
+ swagger-ui:
+  path: /swagger-ui.html
+  #SwaggerUI 웹페이지 접속 경로 설정
+  #기본값은 /swagger-ui/index.html
+  #이 설정을 통해 /swagger-ui.html로 간편하게 접속 가능하다.
