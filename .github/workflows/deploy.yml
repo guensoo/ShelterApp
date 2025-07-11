@@ -110,8 +110,8 @@ jobs:
           source: ".env"
           target: "~/app/Java/shelter-api/.env"
 
-      # ✅ EC2에서 서버 재시작 + systemd 서비스 사용 (.env는 systemd 서비스 파일에서 EnvironmentFile로 관리되어야 함)
-      - name: Restart backend with systemd
+      # ✅ EC2에서 서버 재시작 (systemd 서비스 사용)
+      - name: Restart backend service on EC2
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -119,5 +119,9 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           timeout: 1800s
           script: |
+            # systemd 데몬 리로드 (서비스 파일 변경 시 필수, 또는 매번 실행해도 무방)
             sudo systemctl daemon-reload
-            sudo systemctl restart shelter-api
+            # shelter-api 서비스 재시작
+            sudo systemctl restart shelter-api.service # .service 확장자 붙여주는 것이 명확합니다.
+            # 서비스 상태 확인 (선택 사항, 디버깅에 유용)
+            sudo systemctl status shelter-api.service --no-pager
