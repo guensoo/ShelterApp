@@ -39,6 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     	    || uri.equals("/user/send-reset-link")
     	    || uri.equals("/user/reset-password")
     	    || uri.equals("/user/find-id")
+    	    || uri.equals("/actuator/health")
     	) {
     	    filterChain.doFilter(request, response);
     	    return;

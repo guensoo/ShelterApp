@@ -48,6 +48,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	// AWS S3
 	implementation 'com.amazonaws:aws-java-sdk-s3:1.12.681'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 tasks.named('test') {
