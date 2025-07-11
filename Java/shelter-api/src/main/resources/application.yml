@@ -33,6 +33,7 @@ spring:
           auth: true
           starttls:
             enable: true
+
 cloud:
   aws:
     credentials:
