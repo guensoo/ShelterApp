@@ -6,7 +6,7 @@ let backendHost = '';
 if (hostname === 'localhost') {
   backendHost = 'http://localhost:5000'; // 로컬 개발용
 } else {
-  backendHost = 'http://52.79.236.75:5000'; // 운영 EC2 백엔드 주소
+  backendHost = 'https://shelter-alb-548777259.ap-northeast-2.elb.amazonaws.com'; // 운영 EC2 백엔드 주소
 }
 
 export const API = axios.create({
