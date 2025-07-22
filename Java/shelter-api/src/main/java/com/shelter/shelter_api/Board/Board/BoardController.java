@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -76,6 +77,22 @@ public class BoardController {
         return ResponseEntity.ok()
                 .header("Cache-Control", "no-cache, no-store, must-revalidate")
                 .body(post);
+    }
+    
+    // ✅ 게시글 수정 (PUT)
+    @PutMapping("/{postNo}")
+    public ResponseEntity<BoardResponseDTO> updatePost(
+            @PathVariable("postNo") Long id,
+            @RequestBody BoardRequestDTO dto,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        if (userDetails == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "토큰 없음 or 인증 실패");
+        }
+
+        String username = userDetails.getUsername();
+        BoardResponseDTO updated = boardService.updatePost(id, dto, username);
+        return ResponseEntity.ok(updated);
     }
 
     @Operation(

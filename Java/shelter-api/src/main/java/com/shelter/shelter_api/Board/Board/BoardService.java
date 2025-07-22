@@ -24,23 +24,33 @@ public class BoardService {
     public BoardResponseDTO createPost(BoardRequestDTO dto, String username) {
         Long maxPostNo = boardRepository.findMaxPostNo().orElse(0L);
 
-        // 1. BoardEntity 생성
-        BoardEntity entity = dto.toEntity(username, maxPostNo + 1);
+        // ① user 조회
+        UserEntity user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new RuntimeException("사용자 없음"));
 
-        // 2. 첨부파일 리스트 처리 (files가 null 또는 비어있으면 skip)
+        // ② DTO → Entity 변환 (user 필드 포함)
+        BoardEntity entity = dto.toEntity(username, user, maxPostNo + 1);
+
+        // ③ 첨부파일 처리 (files가 null 아니면)
         if (dto.getFiles() != null && !dto.getFiles().isEmpty()) {
             for (BoardFileDTO fileDto : dto.getFiles()) {
                 BoardFileEntity fileEntity = BoardFileEntity.builder()
-                        .url(fileDto.getUrl())
-                        .originalFilename(fileDto.getOriginalFilename())
-                        .board(entity)
-                        .build();
-                entity.getFiles().add(fileEntity); // BoardEntity의 files에 추가
+                    .url(fileDto.getUrl())
+                    .originalFilename(fileDto.getOriginalFilename())
+                    .board(entity)
+                    .build();
+                entity.getFiles().add(fileEntity);
             }
         }
 
-        BoardEntity saved = boardRepository.save(entity); // cascade ALL이므로 파일도 함께 저장됨
-        return BoardResponseDTO.fromEntity(saved);
+        // ④ 저장
+        BoardEntity saved = boardRepository.save(entity);
+
+        // ⑤ DTO 변환 및 nickname 세팅
+        BoardResponseDTO responseDto = BoardResponseDTO.fromEntity(saved);
+        responseDto.setNickname(user.getNickname());
+
+        return responseDto;
     }
 
     @Transactional(readOnly = true)
@@ -74,6 +84,35 @@ public class BoardService {
         boardRepository.delete(board);
     }
 
+    @Transactional
+    public BoardResponseDTO updatePost(Long postNo, BoardRequestDTO dto, String username) {
+        // 1. 기존 게시글 찾기
+        BoardEntity board = boardRepository.findByPostNoWithFiles(postNo)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
+
+        // 2. 권한 체크 (작성자 또는 관리자만 수정 가능)
+        if (!board.getUsername().equals(username) && !isAdmin(username)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "수정 권한이 없습니다.");
+        }
+
+        // 3. 제목/내용 업데이트
+        board.setTitle(dto.getTitle());
+        board.setContent(dto.getContent());
+        board.setNotice(dto.isNotice());
+        board.setPrivate(dto.isPrivate());
+
+        // 4. 저장 후 DTO 변환
+        BoardEntity updated = boardRepository.save(board);
+
+        // 5. 닉네임 최신화
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("사용자 없음"));
+        BoardResponseDTO response = BoardResponseDTO.fromEntity(updated);
+        response.setNickname(user.getNickname());
+
+        return response;
+    }
+    
     private boolean isAdmin(String username) {
         UserEntity user = userRepository.findByUsername(username).orElse(null);
 

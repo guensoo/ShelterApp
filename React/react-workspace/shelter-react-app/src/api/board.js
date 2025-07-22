@@ -53,6 +53,16 @@ export const fetchBoardEdit = async (postNo) => {
   }
 };
 
+// ✅ 게시글 수정 API
+export const updateBoardPost = async (postNo, data) => {
+  try {
+    const res = await API.put(`/board/${postNo}`, data);
+    return res.data;
+  } catch (err) {
+    throw err.response?.data?.message || err.message || '게시글 수정 실패';
+  }
+};
+
 // 추천 상태 가져오기
 export const getLikedStatus = async (boardId) => {
   const token = localStorage.getItem('token');

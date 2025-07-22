@@ -68,7 +68,7 @@ public class SecurityConfig {
                     "/v3/api-docs/**"
                 ).permitAll()
                 .requestMatchers("/report/**").authenticated()
-                .requestMatchers("/board/write", "/board/*/liked", "/board/*/unliked", "/board/report", "/api/files/upload").authenticated()
+                .requestMatchers("/board/write", "/board/*/liked", "/board/*/unliked", "/board/report", "/api/files/upload", "/board/**").authenticated()
                 .requestMatchers("/user/scraps", "/user/scraps/**").authenticated()
                 .requestMatchers("/comments").authenticated()
                 .requestMatchers("/report/admin/**").hasRole("ADMIN")

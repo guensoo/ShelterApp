@@ -2,12 +2,14 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Box, Typography, TextField, Button } from "@mui/material";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { usePrompt } from "../../hooks/usePrompt"; // usePrompt 훅 임포트
-import { fetchBoardEdit } from "../../api/board";  // 실제 API 호출 함수 임포트
+import { fetchBoardEdit, updateBoardPost } from "../../api/board";  // 실제 API 호출 함수 임포트
+import { useAlert } from "../../context/AlertContext";
 
 const BoardEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const postId = parseInt(id);
+  const { showAlert, showToast } = useAlert();
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -18,7 +20,7 @@ const BoardEdit = () => {
 
   usePrompt("⚠️ 수정을 취소하시겠습니까?", isDirty);
 
-  // 실제 API에서 게시글 데이터 불러오기
+  // ✅ 게시글 데이터 불러오기
   useEffect(() => {
     async function loadPost() {
       try {
@@ -31,11 +33,16 @@ const BoardEdit = () => {
         setIsDirty(false);
       } catch (error) {
         console.warn("게시글을 불러오지 못했습니다.", error);
+        await showAlert({
+          title: "오류",
+          text: "게시글을 불러오지 못했습니다.",
+          icon: "error",
+        });
         navigate("/board");
       }
     }
     loadPost();
-  }, [postId, navigate]);
+  }, [postId, navigate, showAlert]);
 
   // 변경 감지
   const checkDirty = useCallback(() => {
@@ -56,11 +63,25 @@ const BoardEdit = () => {
     checkDirty();
   }, [title, content, checkDirty]);
 
-  const handleUpdate = () => {
-    // TODO: 여기에 수정 API 호출 구현하기
-    console.log("✏️ 게시글 수정 완료 →", { title, content });
-    setIsDirty(false);
-    navigate(`/board/${id}`);
+  // ✅ 게시글 수정
+  const handleUpdate = async () => {
+    try {
+      await updateBoardPost(postId, { title, content });
+      await showToast({
+        title: "게시글이 수정되었습니다.",
+        icon: "success",
+      });
+
+      setIsDirty(false);
+      navigate(`/board/${id}`);
+    } catch (error) {
+      console.error("게시글 수정 실패:", error);
+      await showAlert({
+        title: "수정 실패",
+        text: "게시글 수정에 실패했습니다.",
+        icon: "error",
+      });
+    }
   };
 
   return (

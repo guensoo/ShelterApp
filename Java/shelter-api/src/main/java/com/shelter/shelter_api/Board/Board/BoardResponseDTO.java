@@ -37,8 +37,9 @@ public class BoardResponseDTO {
         dto.setTitle(e.getTitle());
         dto.setContent(e.getContent());
         dto.setUsername(e.getUsername());
+        // ✅ 닉네임 세팅 (user가 null이 아니면 닉네임 가져오기)
         dto.setNickname(
-            e.getUser() != null ? e.getUser().getNickname() : "탈퇴한 사용자" // ✅ nickname 설정
+            e.getUser() != null ? e.getUser().getNickname() : "탈퇴한 사용자"
         );
         dto.setNotice(e.isNotice());
         dto.setPrivate(e.isPrivate());
