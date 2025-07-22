@@ -56,6 +56,7 @@ public class SecurityConfig {
             .httpBasic(httpBasic -> httpBasic.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
+            	.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers(
                     "/shelters/**",
@@ -89,10 +90,12 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
 	        		"https://www.shelter.io.kr",
+	        		"https://api.shelter.io.kr",
 	        		"http://localhost:3000",
 	        		"http://192.168.3.24:3000"
         		));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
