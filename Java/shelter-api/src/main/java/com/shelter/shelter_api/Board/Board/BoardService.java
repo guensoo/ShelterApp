@@ -63,6 +63,10 @@ public class BoardService {
         BoardEntity board = boardRepository.findById(boardId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
 
+        System.out.println("[DEBUG] 요청자 username: " + username);
+        System.out.println("[DEBUG] 게시글 작성자: " + board.getUsername());
+        System.out.println("[DEBUG] isAdmin: " + isAdmin(username));
+        
         if (!board.getUsername().equals(username) && !isAdmin(username)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다.");
         }
