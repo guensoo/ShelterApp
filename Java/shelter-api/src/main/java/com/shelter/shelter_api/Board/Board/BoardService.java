@@ -76,6 +76,12 @@ public class BoardService {
 
     private boolean isAdmin(String username) {
         UserEntity user = userRepository.findByUsername(username).orElse(null);
+
+        // 🟡 이 부분에서 값 확인
+        System.out.println("[DEBUG] isAdmin 호출 username: " + username);
+        System.out.println("[DEBUG] isAdmin user: " + user);
+        System.out.println("[DEBUG] isAdmin user.getRole(): " + (user != null ? user.getRole() : "null"));
+
         return user != null && user.getRole() == Role.ADMIN;
     }
 }
