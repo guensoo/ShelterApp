@@ -21,7 +21,7 @@ public class JwtProvider {
 
     private Key key; // 모든 곳에서 이 key 사용
 
-    private final long validityInMilliseconds = 1000L * 60 * 60; // 1시간
+    private final long validityInMilliseconds = 1000L * 60 * 30; // 30분
 
     // 초기화 시 시크릿키를 Base64로 인코딩해서 key로 변환
     @PostConstruct

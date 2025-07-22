@@ -2,8 +2,10 @@ package com.shelter.shelter_api.Board.Board;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.shelter.shelter_api.User.Role;
 import com.shelter.shelter_api.User.entity.UserEntity;
@@ -59,11 +61,10 @@ public class BoardService {
     @Transactional
     public void deleteBoard(Long boardId, String username) {
         BoardEntity board = boardRepository.findById(boardId)
-            .orElseThrow(() -> new RuntimeException("게시글이 존재하지 않습니다."));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "게시글이 존재하지 않습니다."));
 
-        // 관리자이거나, 본인이 작성한 글인지 체크 (예시)
         if (!board.getUsername().equals(username) && !isAdmin(username)) {
-            throw new RuntimeException("삭제 권한이 없습니다.");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "삭제 권한이 없습니다.");
         }
 
         boardRepository.delete(board);
